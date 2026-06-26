@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const multer = require('multer');
 
 const app = express();
 
@@ -14,36 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 // Static folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// =====================
-// MULTER CONFIG
-// =====================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage });
-
-// =====================
-// UPLOAD ROUTE
-// =====================
-app.post("/api/lab/upload", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      message: "No file uploaded",
-    });
-  }
-
-  return res.json({
-    success: true,
-    url: `/uploads/${req.file.filename}`,
-  });
-});
+app.use("/api/upload", require("./src/routes/uploadRoutes"));
 
 // =====================
 // ROUTES

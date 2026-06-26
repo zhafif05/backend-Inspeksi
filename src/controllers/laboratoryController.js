@@ -5,7 +5,7 @@ const getAllLaboratories = async (req, res, next) => {
     const [labs] = await pool.query(
       `SELECT l.id, l.nama_lab, l.lokasi, l.kalab_id,
               u.name as penanggung_jawab, u.name as kalab_name, u.nip as nip_penanggung_jawab,
-              l.item_ids, l.created_at, l.updated_at
+              l.item_ids, l.report_file, l.created_at, l.updated_at
        FROM laboratories l
        LEFT JOIN users u ON l.kalab_id = u.id
        ORDER BY l.created_at DESC`
