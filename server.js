@@ -49,7 +49,7 @@ app.post("/api/lab/upload", upload.single("file"), (req, res) => {
 // ROUTES
 // =====================
 app.use('/api/auth', require('./src/routes/authRoutes'));
-app.use('/api/users', require('./src/routes/userRoutes'));
+app.use('/api/users', require('./src/routes/userRoutes'));  
 app.use('/api/labs', require('./src/routes/laboratoryRoutes'));
 app.use('/api/items', require('./src/routes/itemRoutes'));
 app.use('/api/inspections', require('./src/routes/inspectionDetailRoutes'));

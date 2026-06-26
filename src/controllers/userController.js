@@ -74,24 +74,63 @@ const createUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, nip, email, role } = req.body;
+    const { name, nip, email, role, password } = req.body;
 
-    const [users] = await pool.query('SELECT id FROM users WHERE id = ?', [id]);
+    const [users] = await pool.query(
+      "SELECT id FROM users WHERE id = ?",
+      [id]
+    );
+
     if (users.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'User tidak ditemukan'
+        message: "User tidak ditemukan",
       });
     }
 
-    await pool.query(
-      'UPDATE users SET name = ?, nip = ?, email = ?, role = ? WHERE id = ?',
-      [name, nip || '', email, role, id]
-    );
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await pool.query(
+        `UPDATE users
+         SET
+            name = ?,
+            nip = ?,
+            email = ?,
+            role = ?,
+            password = ?
+         WHERE id = ?`,
+        [
+          name,
+          nip || "",
+          email,
+          role,
+          hashedPassword,
+          id,
+        ]
+      );
+    } else {
+      await pool.query(
+        `UPDATE users
+         SET
+            name = ?,
+            nip = ?,
+            email = ?,
+            role = ?
+         WHERE id = ?`,
+        [
+          name,
+          nip || "",
+          email,
+          role,
+          id,
+        ]
+      );
+    }
 
     res.status(200).json({
       success: true,
-      message: 'User berhasil diperbarui'
+      message: "User berhasil diperbarui",
     });
   } catch (err) {
     next(err);

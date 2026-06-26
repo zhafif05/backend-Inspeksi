@@ -114,7 +114,35 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+const updateProfile = async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+
+    await pool.query(
+      `UPDATE users
+       SET name = ?, email = ?
+       WHERE id = ?`,
+      [name, email, req.user.id]
+    );
+
+    const [rows] = await pool.query(
+      `SELECT id, name, email, nip, role
+       FROM users
+       WHERE id = ?`,
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      data: rows[0],
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   login,
-  getProfile
+  getProfile,
+  updateProfile
 };
