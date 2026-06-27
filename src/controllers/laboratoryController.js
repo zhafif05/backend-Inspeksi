@@ -3,14 +3,15 @@ const pool = require('../config/database');
 const getAllLaboratories = async (req, res, next) => {
   try {
     const [labs] = await pool.query(
-      `SELECT l.id, l.nama_lab, l.lokasi, l.kalab_id,
-              u.name as penanggung_jawab, u.name as kalab_name, u.nip as nip_penanggung_jawab,
+      `SELECT l.id, l.nama_lab, l.lokasi, l.kalab_id,l.plp1_id, l.plp2_id,
+              u.name as penanggung_jawab, u.name as kalab_name, u.nip as nip_penanggung_jawab,plp1.name AS plp1_name, plp2.name AS plp2_name,
               l.item_ids, l.report_file, l.created_at, l.updated_at
        FROM laboratories l
        LEFT JOIN users u ON l.kalab_id = u.id
+       LEFT JOIN users plp1 ON l.plp1_id = plp1.id
+       LEFT JOIN users plp2 ON l.plp2_id = plp2.id
        ORDER BY l.created_at DESC`
     );
-
     // Ambil detail items dari item_ids (CSV)
     for (const lab of labs) {
       const ids = lab.item_ids ? lab.item_ids.split(',').map(Number) : [];

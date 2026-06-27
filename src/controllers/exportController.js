@@ -52,11 +52,15 @@ const exportInspection = async (req, res, next) => {
     const [inspections] = await pool.query(
       `SELECT i.*, u.name as inspector_name, l.nama_lab, l.lokasi,
               kalab.name as penanggung_jawab, kalab.nip,
+              plp1.name AS plp1_name, plp1.nip AS plp1_nip,
+              plp2.name AS plp2_name, plp2.nip AS plp2_nip,
               it.nama_barang, it.kode_barang, it.pembuat_alat, it.tanggal_pembelian
        FROM inspections i
        LEFT JOIN users u ON i.inspector_id = u.id
        LEFT JOIN laboratories l ON i.laboratory_id = l.id
        LEFT JOIN users kalab ON l.kalab_id = kalab.id
+       LEFT JOIN users plp1 ON l.plp1_id = plp1.id
+       LEFT JOIN users plp2 ON l.plp2_id = plp2.id
        LEFT JOIN items it ON i.item_id = it.id
        WHERE i.id = ?`, [id]
     );
@@ -302,6 +306,35 @@ const exportInspection = async (req, res, next) => {
         name: 'Calibri', size: 11, bold: false, color: { argb: 'FF000000' }
       };
     }
+    if (inspection.plp1_name) {
+      sheet.getCell(`G${kalabNameRow}`).value = inspection.plp1_name;
+
+      sheet.getCell(`G${kalabNameRow}`).font = {
+        name: "Calibri",
+        size: 11,
+        bold: true,
+        underline: true,
+        color: { argb: "FF000000" }
+      };
+
+      sheet.getCell(`G${kalabNipRow}`).value =
+        `NIP. ${inspection.plp1_nip || "-"}`;
+    }
+
+    if (inspection.plp2_name) {
+      sheet.getCell(`P${kalabNameRow}`).value = inspection.plp2_name;
+
+      sheet.getCell(`P${kalabNameRow}`).font = {
+        name: "Calibri",
+        size: 11,
+        bold: true,
+        underline: true,
+        color: { argb: "FF000000" }
+      };
+
+      sheet.getCell(`P${kalabNipRow}`).value =
+        `NIP. ${inspection.plp2_nip || "-"}`;
+    }
 
     // =============================
     // FOTO INSPEKSI
@@ -321,7 +354,7 @@ const exportInspection = async (req, res, next) => {
           .replace(".", "")
           .toLowerCase();
 
-        const imageId = workbook.addImage({
+        const imageId = wb.addImage({
           filename: fotoPath,
           extension: ext
         });
