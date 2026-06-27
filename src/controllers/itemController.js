@@ -185,37 +185,115 @@ const updateItem = async (req, res, next) => {
 
 // Delete item (admin only)
 const deleteItem = async (req, res, next) => {
+  const conn = await pool.getConnection();
+
   try {
     const { id } = req.params;
 
-    // Check if item exists
-    const [items] = await pool.query('SELECT id FROM items WHERE id = ?', [id]);
+    await conn.beginTransaction();
+
+    // Cek item
+    const [items] = await conn.query(
+      'SELECT id FROM items WHERE id = ?',
+      [id]
+    );
+
     if (items.length === 0) {
+      await conn.rollback();
       return res.status(404).json({
         success: false,
         message: 'Barang tidak ditemukan'
       });
     }
 
-    // Hapus item_id dari semua lab yang mereferensi
-    const [labs] = await pool.query('SELECT id, item_ids FROM laboratories WHERE item_ids IS NOT NULL');
+    // Hapus item_id dari seluruh laboratorium
+    const [labs] = await conn.query(
+      'SELECT id, item_ids FROM laboratories WHERE item_ids IS NOT NULL'
+    );
+
     for (const lab of labs) {
-      const ids = lab.item_ids.split(',').map(Number).filter(Boolean);
-      const filtered = ids.filter((iid) => iid !== Number(id));
+      const ids = lab.item_ids
+        .split(',')
+        .map(Number)
+        .filter(Boolean);
+
+      const filtered = ids.filter(i => i !== Number(id));
+
       if (filtered.length !== ids.length) {
-        await pool.query('UPDATE laboratories SET item_ids = ? WHERE id = ?', [filtered.join(','), lab.id]);
+        await conn.query(
+          'UPDATE laboratories SET item_ids = ? WHERE id = ?',
+          [filtered.join(','), lab.id]
+        );
       }
     }
 
-    // Delete item
-    await pool.query('DELETE FROM items WHERE id = ?', [id]);
+    // ==========================
+    // HAPUS CATEGORY & SUBITEM
+    // ==========================
+
+    const [categories] = await conn.query(
+      `SELECT id
+       FROM inspection_categories
+       WHERE item_id = ?`,
+      [id]
+    );
+
+    for (const category of categories) {
+      await conn.query(
+        `DELETE FROM inspection_subitems
+         WHERE category_id = ?`,
+        [category.id]
+      );
+    }
+
+    await conn.query(
+      `DELETE FROM inspection_categories
+       WHERE item_id = ?`,
+      [id]
+    );
+
+    // ==========================
+    // OPTIONAL
+    // ==========================
+
+    // Kalau punya tabel inspections
+    await conn.query(
+      `DELETE FROM inspections
+       WHERE item_id = ?`,
+      [id]
+    );
+
+    // Kalau punya tabel inspection_results
+    // (hapus jika memang ada relasi)
+    await conn.query(`
+      DELETE ir
+      FROM inspection_results ir
+      JOIN inspections i
+      ON ir.inspection_id = i.id
+      WHERE i.item_id = ?
+    `, [id]);
+
+    // ==========================
+    // HAPUS ITEM
+    // ==========================
+
+    await conn.query(
+      'DELETE FROM items WHERE id = ?',
+      [id]
+    );
+
+    await conn.commit();
 
     res.status(200).json({
       success: true,
       message: 'Barang berhasil dihapus'
     });
+
   } catch (err) {
+    await conn.rollback();
     next(err);
+  } finally {
+    conn.release();
   }
 };
 

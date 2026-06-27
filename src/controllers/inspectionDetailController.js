@@ -441,10 +441,6 @@ const updateInspectionResult = async (req, res, next) => {
     const { resultId } = req.params;
     let { status, keterangan } = req.body;
 
-    console.log("BODY:", req.body);
-    console.log("STATUS:", status);
-    console.log("TYPE:", typeof status);
-
     // Trim and validate status
     status = status?.trim()?.toUpperCase();
     if (!status || !['B', 'K', 'N/A'].includes(status)) {
@@ -805,15 +801,6 @@ const getPendingReviews = async (req, res, next) => {
        ORDER BY imr.created_at DESC`,
       params
     );
-    console.log(
-  pending.map(p => ({
-    inspection: p.inspection_id,
-    tahun: p.tahun,
-    semester: p.semester,
-    bulan: p.bulan_ke,
-    barang: p.nama_barang
-  }))
-);
 
     res.status(200).json({
       success: true,

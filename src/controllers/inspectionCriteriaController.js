@@ -7,18 +7,38 @@ const createInspectionCategory = async (req, res, next) => {
   try {
     const { nama_kategori, deskripsi, urutan, item_id } = req.body;
     const kalabId = req.user.id;
-
     let laboratoryId;
-    if (req.user.role === 'admin') {
+
+    if (req.user.role === "admin") {
       if (!req.body.laboratory_id) {
         return res.status(400).json({
           success: false,
-          message: 'Admin harus mengisi laboratory_id'
+          message: "Admin harus mengisi laboratory_id",
         });
       }
+
       laboratoryId = req.body.laboratory_id;
+
     } else {
-      laboratoryId = req.user.laboratory_id || null;
+
+      const [labs] = await pool.query(
+        `
+    SELECT id
+    FROM laboratories
+    WHERE FIND_IN_SET(?, item_ids)
+    LIMIT 1
+    `,
+        [item_id]
+      );
+
+      if (labs.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Lab tidak ditemukan untuk item tersebut",
+        });
+      }
+
+      laboratoryId = labs[0].id;
     }
 
     // Check duplicate
@@ -106,16 +126,37 @@ const createInspectionCategoryWithSubitems = async (req, res, next) => {
     const userId = req.user.id;
 
     let laboratoryId;
-    if (req.user.role === 'admin') {
+
+    if (req.user.role === "admin") {
       if (!req.body.laboratory_id) {
         return res.status(400).json({
           success: false,
-          message: 'Admin harus mengisi laboratory_id'
+          message: "Admin harus mengisi laboratory_id",
         });
       }
+
       laboratoryId = req.body.laboratory_id;
+
     } else {
-      laboratoryId = req.user.laboratory_id || null;
+
+      const [labs] = await pool.query(
+        `
+    SELECT id
+    FROM laboratories
+    WHERE FIND_IN_SET(?, item_ids)
+    LIMIT 1
+    `,
+        [item_id]
+      );
+
+      if (labs.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Lab tidak ditemukan untuk item tersebut",
+        });
+      }
+
+      laboratoryId = labs[0].id;
     }
 
     const connection = await pool.getConnection();
@@ -399,7 +440,7 @@ const getPendingCategories = async (req, res, next) => {
 const getPendingSubitems = async (req, res, next) => {
   try {
     const [subitems] = await pool.query(
-       `SELECT si.*, ic.nama_kategori, ic.laboratory_id, u.name as created_by_name
+      `SELECT si.*, ic.nama_kategori, ic.laboratory_id, u.name as created_by_name
         FROM inspection_subitems si
         JOIN inspection_categories ic ON si.category_id = ic.id
         LEFT JOIN users u ON si.created_by = u.id
@@ -586,7 +627,33 @@ const rejectSubitem = async (req, res, next) => {
 // Get approved categories with subitems (for inspection forms)
 const getApprovedCategoriesWithSubitems = async (req, res, next) => {
   try {
-    const laboratoryId = req.user.laboratory_id;
+    const { item_id } = req.body;
+
+    let laboratoryId = null;
+
+    // Admin tetap boleh memilih lab
+    if (req.user.role === "admin") {
+      laboratoryId = req.body.laboratory_id;
+    } else {
+      const [labs] = await pool.query(
+        `
+        SELECT id
+        FROM laboratories
+        WHERE FIND_IN_SET(?, item_ids)
+        LIMIT 1
+        `,
+        [item_id]
+      );
+
+      if (labs.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Lab untuk item tersebut tidak ditemukan",
+        });
+      }
+
+      laboratoryId = labs[0].id;
+    }
 
     let categoryQuery;
     let queryParams;
