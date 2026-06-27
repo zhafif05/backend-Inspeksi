@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 23 Jun 2026 pada 05.49
+-- Waktu pembuatan: 27 Jun 2026 pada 08.02
 -- Versi server: 10.4.28-MariaDB
 -- Versi PHP: 8.2.4
 
@@ -60,7 +60,8 @@ INSERT INTO `inspections` (`id`, `laboratory_id`, `item_id`, `tahun`, `semester`
 (204, 11, 29, '2025', 'GANJIL', 3, '2025-09-10 08:00:00', NULL, NULL, '2026-06-18 07:49:53', '2026-06-18 07:49:53'),
 (205, 10, 30, '2025', 'GANJIL', 11, '2025-08-20 08:00:00', NULL, NULL, '2026-06-18 07:49:53', '2026-06-18 07:49:53'),
 (206, 10, 30, '2025', 'GENAP', 11, '2025-02-20 08:00:00', NULL, NULL, '2026-06-18 07:49:53', '2026-06-18 07:49:53'),
-(207, 14, 57, '2025', 'GANJIL', 11, '2025-03-15 08:00:00', NULL, NULL, '2026-06-18 08:28:11', '2026-06-18 08:28:11');
+(207, 14, 57, '2025', 'GANJIL', 11, '2025-03-15 08:00:00', NULL, NULL, '2026-06-18 08:28:11', '2026-06-18 08:28:11'),
+(208, 12, 42, '2026', 'GENAP', 11, '2026-06-26 14:44:04', 's', '/uploads/foto-1782459844336-93915448.jpeg', '2026-06-26 07:44:04', '2026-06-26 07:44:04');
 
 -- --------------------------------------------------------
 
@@ -87,9 +88,7 @@ CREATE TABLE `inspection_categories` (
 --
 
 INSERT INTO `inspection_categories` (`id`, `nama_kategori`, `deskripsi`, `urutan`, `status`, `alasan_penolakan`, `created_by`, `laboratory_id`, `item_id`, `created_at`, `updated_at`) VALUES
-(67, 'MAKAN', '11', 1, 'APPROVED', NULL, 3, 10, NULL, '2026-06-10 06:33:02', '2026-06-10 06:33:27'),
 (70, 'omkegas', 'omke gas', 1, 'APPROVED', NULL, 3, 11, 21, '2026-06-12 03:35:10', '2026-06-12 03:35:22'),
-(71, 'CONTOH1', 'dd', 1, 'APPROVED', NULL, 3, 10, NULL, '2026-06-12 07:24:04', '2026-06-12 07:24:11'),
 (72, 'contoh', NULL, 1, 'APPROVED', NULL, 3, 11, 29, '2026-06-13 13:08:53', '2026-06-13 13:09:07'),
 (73, 'contoh  2', NULL, 2, 'APPROVED', NULL, 3, 11, 29, '2026-06-13 13:08:53', '2026-06-13 13:09:08'),
 (74, 'eqawfcs', NULL, 1, 'APPROVED', NULL, 11, 10, 30, '2026-06-13 16:05:13', '2026-06-13 16:13:22'),
@@ -99,27 +98,23 @@ INSERT INTO `inspection_categories` (`id`, `nama_kategori`, `deskripsi`, `urutan
 (78, 'SCC', NULL, 1, 'APPROVED', NULL, 11, 10, 41, '2026-06-15 04:37:02', '2026-06-15 04:37:21'),
 (79, 'ACSWFQC', NULL, 2, 'APPROVED', NULL, 11, 10, 41, '2026-06-15 04:37:02', '2026-06-15 06:46:43'),
 (80, 'KATEGORI-3', NULL, 1, 'APPROVED', NULL, 3, 12, 31, '2026-06-15 06:22:04', '2026-06-15 06:22:46'),
-(81, 'TES1.1', NULL, 1, 'APPROVED', NULL, 3, 13, NULL, '2026-06-15 07:50:04', '2026-06-15 07:50:17'),
-(82, 'TES1.2', NULL, 2, 'APPROVED', NULL, 3, 13, NULL, '2026-06-15 07:50:04', '2026-06-15 08:15:31'),
-(83, 'fdsf', NULL, 1, 'APPROVED', NULL, 11, 10, NULL, '2026-06-15 08:25:12', '2026-06-15 08:25:42'),
-(84, 'dfsd', NULL, 2, 'APPROVED', NULL, 11, 10, NULL, '2026-06-15 08:25:12', '2026-06-15 08:26:17'),
-(85, 'KATEGORI-1', NULL, 1, 'APPROVED', NULL, 11, 10, NULL, '2026-06-15 08:59:31', '2026-06-15 08:59:59'),
-(86, 'alat1', NULL, 1, 'APPROVED', NULL, 3, 10, NULL, '2026-06-15 09:51:30', '2026-06-15 09:51:38'),
-(87, 'alat2', NULL, 2, 'APPROVED', NULL, 3, 10, NULL, '2026-06-15 09:51:30', '2026-06-15 09:52:10'),
 (88, 'Pemeriksaan Fisik dan Umum', NULL, 1, 'APPROVED', NULL, 15, 14, 57, '2026-06-17 08:11:49', '2026-06-17 08:13:25'),
 (89, 'Pemeriksaan Sistem Optik', NULL, 2, 'APPROVED', NULL, 15, 14, 57, '2026-06-17 08:11:49', '2026-06-17 08:13:27'),
 (90, 'Pemeriksaan Kompartemen Sampel (Sample Holder)', NULL, 3, 'APPROVED', NULL, 15, 14, 57, '2026-06-17 08:11:49', '2026-06-17 08:14:59'),
-(91, 'a', NULL, 1, 'APPROVED', NULL, 11, 10, NULL, '2026-06-17 09:36:57', '2026-06-18 03:37:05'),
 (92, 's', NULL, 1, 'APPROVED', NULL, 11, 10, 62, '2026-06-18 05:45:46', '2026-06-18 05:46:02'),
-(94, 'sd1', NULL, 1, 'APPROVED', NULL, 3, 13, NULL, '2026-06-18 05:47:31', '2026-06-18 05:47:34'),
-(95, 'sd3', NULL, 2, 'APPROVED', NULL, 3, 13, NULL, '2026-06-18 05:47:31', '2026-06-18 05:47:36'),
 (96, 'sd1', NULL, 1, 'APPROVED', NULL, 11, 10, 64, '2026-06-18 05:48:39', '2026-06-18 05:48:52'),
 (97, 'sd3', NULL, 2, 'APPROVED', NULL, 11, 10, 64, '2026-06-18 05:48:39', '2026-06-18 05:48:53'),
 (98, 'sx1', NULL, 1, 'APPROVED', NULL, 11, 10, 65, '2026-06-18 05:58:31', '2026-06-18 05:58:41'),
 (99, 'sx3', NULL, 2, 'APPROVED', NULL, 11, 10, 65, '2026-06-18 05:58:31', '2026-06-18 06:09:32'),
 (100, 'sz', NULL, 1, 'APPROVED', NULL, 11, 10, 65, '2026-06-18 06:09:05', '2026-06-18 06:09:31'),
 (101, 'sv', NULL, 1, 'APPROVED', NULL, 11, 10, 66, '2026-06-18 06:10:27', '2026-06-18 06:10:36'),
-(103, 'p', NULL, 1, 'APPROVED', NULL, 11, 10, NULL, '2026-06-18 08:14:06', '2026-06-19 03:26:38');
+(104, 'coba', NULL, 1, 'APPROVED', NULL, 11, 10, 42, '2026-06-26 04:18:58', '2026-06-26 07:30:01'),
+(105, 's', NULL, 1, 'APPROVED', NULL, 11, 10, 42, '2026-06-26 07:39:27', '2026-06-26 07:40:16'),
+(106, 'sed', NULL, 1, 'APPROVED', NULL, 11, 10, 69, '2026-06-27 04:12:32', '2026-06-27 04:48:01'),
+(107, 'saw', NULL, 1, 'APPROVED', NULL, 3, 12, 69, '2026-06-27 04:28:39', '2026-06-27 04:48:02'),
+(111, 'asdf', NULL, 1, 'APPROVED', NULL, 3, 12, 69, '2026-06-27 04:33:09', '2026-06-27 04:48:03'),
+(113, 'asdfg', NULL, 1, 'APPROVED', NULL, 11, 13, 71, '2026-06-27 04:40:31', '2026-06-27 04:41:25'),
+(116, 'awe', NULL, 1, 'PENDING', NULL, 3, 12, 69, '2026-06-27 04:48:19', '2026-06-27 04:48:19');
 
 -- --------------------------------------------------------
 
@@ -187,10 +182,20 @@ INSERT INTO `inspection_monthly_reviews` (`id`, `inspection_id`, `bulan_ke`, `re
 (102, 204, 1, 'APPROVED', 3, NULL, '2026-06-18 07:49:53', '2026-06-18 07:49:53', '2026-06-18 07:49:53'),
 (103, 29, 2, 'APPROVED', 3, NULL, '2026-06-18 09:44:24', '2026-06-18 09:44:03', '2026-06-18 09:44:24'),
 (104, 30, 2, 'APPROVED', 3, NULL, '2026-06-22 07:53:19', '2026-06-22 07:48:12', '2026-06-22 07:53:19'),
-(105, 30, 3, 'PENDING', NULL, NULL, NULL, '2026-06-22 08:06:20', '2026-06-22 08:06:20'),
-(106, 29, 3, 'PENDING', NULL, NULL, NULL, '2026-06-22 08:47:26', '2026-06-22 08:47:26'),
-(107, 31, 2, 'PENDING', NULL, NULL, NULL, '2026-06-22 08:47:32', '2026-06-22 08:47:32'),
-(108, 28, 2, 'PENDING', NULL, NULL, NULL, '2026-06-22 08:47:39', '2026-06-22 08:47:39');
+(105, 30, 3, 'APPROVED', 3, NULL, '2026-06-26 04:17:08', '2026-06-22 08:06:20', '2026-06-26 04:17:08'),
+(106, 29, 3, 'APPROVED', 3, NULL, '2026-06-26 04:17:13', '2026-06-22 08:47:26', '2026-06-26 04:17:13'),
+(107, 31, 2, 'APPROVED', 3, NULL, '2026-06-26 04:17:21', '2026-06-22 08:47:32', '2026-06-26 04:17:21'),
+(108, 28, 2, 'APPROVED', 3, NULL, '2026-06-26 04:17:26', '2026-06-22 08:47:39', '2026-06-26 04:17:26'),
+(109, 30, 4, 'APPROVED', 3, NULL, '2026-06-26 07:27:09', '2026-06-26 04:18:08', '2026-06-26 07:27:09'),
+(110, 29, 4, 'APPROVED', 3, NULL, '2026-06-26 07:27:13', '2026-06-26 04:18:16', '2026-06-26 07:27:13'),
+(111, 31, 3, 'APPROVED', 3, NULL, '2026-06-26 07:27:16', '2026-06-26 04:18:26', '2026-06-26 07:27:16'),
+(112, 28, 3, 'APPROVED', 3, NULL, '2026-06-26 07:27:19', '2026-06-26 04:18:31', '2026-06-26 07:27:19'),
+(113, 30, 5, 'APPROVED', 3, NULL, '2026-06-26 07:40:27', '2026-06-26 07:39:07', '2026-06-26 07:40:27'),
+(114, 208, 1, 'PENDING', NULL, NULL, NULL, '2026-06-26 07:44:04', '2026-06-26 07:44:04'),
+(115, 30, 6, 'PENDING', NULL, NULL, NULL, '2026-06-26 07:47:50', '2026-06-26 07:47:50'),
+(116, 29, 5, 'PENDING', NULL, NULL, NULL, '2026-06-26 07:47:57', '2026-06-26 07:47:57'),
+(117, 31, 4, 'PENDING', NULL, NULL, NULL, '2026-06-26 07:48:06', '2026-06-26 07:48:06'),
+(118, 28, 4, 'PENDING', NULL, NULL, NULL, '2026-06-26 07:48:11', '2026-06-26 07:48:11');
 
 -- --------------------------------------------------------
 
@@ -480,13 +485,30 @@ INSERT INTO `inspection_results` (`id`, `inspection_id`, `subitem_id`, `bulan_ke
 (1011, 29, 252, 2, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-18 09:44:03'),
 (1013, 29, 251, 2, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-18 09:44:03'),
 (1014, 30, 253, 2, 'B', NULL, 'Baik', 'APPROVED', '2026-06-22 07:48:12'),
-(1015, 30, 253, 3, 'K', NULL, 'Kurang', 'PENDING', '2026-06-22 08:06:20'),
-(1016, 29, 250, 3, 'K', NULL, 'Kurang', 'PENDING', '2026-06-22 08:47:26'),
-(1017, 29, 252, 3, 'B', NULL, 'Baik', 'PENDING', '2026-06-22 08:47:26'),
-(1018, 29, 251, 3, 'K', NULL, 'Kurang', 'PENDING', '2026-06-22 08:47:26'),
-(1019, 31, 248, 2, 'K', NULL, 'Kurang', 'PENDING', '2026-06-22 08:47:32'),
-(1020, 31, 249, 2, 'K', NULL, 'Kurang', 'PENDING', '2026-06-22 08:47:32'),
-(1021, 28, 244, 2, 'B', NULL, 'Baik', 'PENDING', '2026-06-22 08:47:39');
+(1015, 30, 253, 3, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-22 08:06:20'),
+(1016, 29, 250, 3, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-22 08:47:26'),
+(1017, 29, 252, 3, 'B', NULL, 'Baik', 'APPROVED', '2026-06-22 08:47:26'),
+(1018, 29, 251, 3, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-22 08:47:26'),
+(1019, 31, 248, 2, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-22 08:47:32'),
+(1020, 31, 249, 2, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-22 08:47:32'),
+(1021, 28, 244, 2, 'B', NULL, 'Baik', 'APPROVED', '2026-06-22 08:47:39'),
+(1022, 30, 253, 4, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-26 04:18:08'),
+(1023, 29, 250, 4, 'B', NULL, 'Baik', 'APPROVED', '2026-06-26 04:18:16'),
+(1024, 29, 252, 4, 'B', NULL, 'Baik', 'APPROVED', '2026-06-26 04:18:16'),
+(1025, 29, 251, 4, 'K', NULL, 'Kurang', 'APPROVED', '2026-06-26 04:18:16'),
+(1026, 31, 248, 3, 'B', NULL, 'Baik', 'APPROVED', '2026-06-26 04:18:26'),
+(1027, 31, 249, 3, 'B', NULL, 'Baik', 'APPROVED', '2026-06-26 04:18:26'),
+(1028, 28, 244, 3, 'B', NULL, 'Baik', 'APPROVED', '2026-06-26 04:18:31'),
+(1029, 30, 253, 5, 'B', NULL, 'Baik', 'APPROVED', '2026-06-26 07:39:07'),
+(1030, 208, 256, 1, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:44:04'),
+(1031, 208, 257, 1, 'K', NULL, 'Kurang', 'PENDING', '2026-06-26 07:44:04'),
+(1032, 30, 253, 6, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:47:50'),
+(1033, 29, 250, 5, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:47:57'),
+(1034, 29, 252, 5, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:47:57'),
+(1035, 29, 251, 5, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:47:57'),
+(1036, 31, 248, 4, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:48:06'),
+(1037, 31, 249, 4, 'K', NULL, 'Kurang', 'PENDING', '2026-06-26 07:48:06'),
+(1038, 28, 244, 4, 'B', NULL, 'Baik', 'PENDING', '2026-06-26 07:48:11');
 
 -- --------------------------------------------------------
 
@@ -512,21 +534,12 @@ CREATE TABLE `inspection_subitems` (
 --
 
 INSERT INTO `inspection_subitems` (`id`, `category_id`, `nama_subitem`, `deskripsi`, `urutan`, `status`, `alasan_penolakan`, `created_by`, `created_at`, `updated_at`) VALUES
-(176, 67, 'MIE', NULL, 1, 'APPROVED', NULL, 3, '2026-06-10 06:33:02', '2026-06-10 06:33:28'),
-(177, 67, 'TAHU', NULL, 2, 'APPROVED', NULL, 3, '2026-06-10 06:33:02', '2026-06-10 06:33:28'),
-(178, 67, 'TEMPE', NULL, 3, 'APPROVED', NULL, 3, '2026-06-10 06:33:02', '2026-06-10 06:33:37'),
-(179, 67, 'RENDANG', NULL, 4, 'APPROVED', NULL, 3, '2026-06-10 06:33:02', '2026-06-10 06:33:37'),
-(180, 67, 'SOTO', NULL, 5, 'APPROVED', NULL, 3, '2026-06-10 06:33:02', '2026-06-10 06:33:37'),
-(181, 67, 'ODADING', NULL, 6, 'APPROVED', NULL, 3, '2026-06-10 06:33:02', '2026-06-10 06:33:37'),
 (184, 70, 'omke gas', NULL, 1, 'APPROVED', NULL, 3, '2026-06-12 03:35:10', '2026-06-12 03:35:23'),
 (185, 70, 'omke gas', NULL, 2, 'APPROVED', NULL, 3, '2026-06-12 03:35:10', '2026-06-12 03:35:24'),
 (186, 70, 'omke gas', NULL, 3, 'APPROVED', NULL, 3, '2026-06-12 03:35:10', '2026-06-12 03:35:25'),
 (187, 70, 'omke gas', NULL, 4, 'APPROVED', NULL, 3, '2026-06-12 03:35:10', '2026-06-12 03:35:29'),
 (188, 70, 'omke gas', NULL, 5, 'APPROVED', NULL, 3, '2026-06-12 03:35:10', '2026-06-12 03:35:31'),
 (189, 70, 'omke gas', NULL, 6, 'APPROVED', NULL, 3, '2026-06-12 03:35:10', '2026-06-12 03:35:33'),
-(190, 71, 'contoh 2', NULL, 1, 'APPROVED', NULL, 3, '2026-06-12 07:24:04', '2026-06-12 07:24:13'),
-(191, 71, 'contoh 3', NULL, 2, 'APPROVED', NULL, 3, '2026-06-12 07:24:04', '2026-06-12 07:24:14'),
-(192, 71, 'contoh 4', NULL, 3, 'APPROVED', NULL, 3, '2026-06-12 07:24:04', '2026-06-12 07:24:15'),
 (193, 72, 'contoh1', NULL, 1, 'APPROVED', NULL, 3, '2026-06-13 13:08:53', '2026-06-13 13:18:52'),
 (194, 72, 'contoh2', NULL, 2, 'APPROVED', NULL, 3, '2026-06-13 13:08:53', '2026-06-13 13:18:53'),
 (195, 72, 'contoh3', NULL, 3, 'APPROVED', NULL, 3, '2026-06-13 13:08:53', '2026-06-13 13:18:54'),
@@ -553,20 +566,6 @@ INSERT INTO `inspection_subitems` (`id`, `category_id`, `nama_subitem`, `deskrip
 (216, 80, 'EEEEEEEE', NULL, 1, 'APPROVED', NULL, 3, '2026-06-15 06:22:04', '2026-06-15 06:24:26'),
 (217, 80, 'EEEEEEEE', NULL, 2, 'APPROVED', NULL, 3, '2026-06-15 06:22:04', '2026-06-15 06:24:27'),
 (218, 80, 'EEEEEEEE', NULL, 3, 'APPROVED', NULL, 3, '2026-06-15 06:22:04', '2026-06-15 06:24:29'),
-(219, 81, 'TT', NULL, 1, 'PENDING', NULL, 3, '2026-06-15 07:50:04', '2026-06-15 07:50:04'),
-(220, 81, 'TT2', NULL, 2, 'PENDING', NULL, 3, '2026-06-15 07:50:04', '2026-06-15 07:50:04'),
-(221, 82, 'TT2', NULL, 1, 'PENDING', NULL, 3, '2026-06-15 07:50:04', '2026-06-15 07:50:04'),
-(223, 82, 'TT3sss', NULL, 2, 'PENDING', NULL, 3, '2026-06-15 08:15:10', '2026-06-15 08:15:10'),
-(224, 83, 'dfsdf', NULL, 1, 'PENDING', NULL, 11, '2026-06-15 08:25:12', '2026-06-15 08:25:12'),
-(226, 84, 'fsdfsfss', NULL, 1, 'PENDING', NULL, 11, '2026-06-15 08:25:54', '2026-06-15 08:25:54'),
-(227, 85, 'SUB-1.1', NULL, 1, 'PENDING', NULL, 11, '2026-06-15 08:59:31', '2026-06-15 08:59:31'),
-(228, 85, 'SUB-1.2', NULL, 2, 'PENDING', NULL, 11, '2026-06-15 08:59:31', '2026-06-15 08:59:31'),
-(229, 86, 'alat1-1', NULL, 1, 'PENDING', NULL, 3, '2026-06-15 09:51:30', '2026-06-15 09:51:30'),
-(230, 86, 'alatt1-2', NULL, 2, 'PENDING', NULL, 3, '2026-06-15 09:51:30', '2026-06-15 09:51:30'),
-(231, 86, 'alat1-3', NULL, 3, 'PENDING', NULL, 3, '2026-06-15 09:51:30', '2026-06-15 09:51:30'),
-(232, 87, 'alat2-1', NULL, 1, 'PENDING', NULL, 3, '2026-06-15 09:51:30', '2026-06-15 09:51:30'),
-(233, 87, 'alat2-2', NULL, 2, 'PENDING', NULL, 3, '2026-06-15 09:51:30', '2026-06-15 09:51:30'),
-(234, 87, 'alat2-3', NULL, 3, 'PENDING', NULL, 3, '2026-06-15 09:52:07', '2026-06-15 09:52:07'),
 (235, 88, 'Body alat bersih, bebas debu dan tumpahan bahan kimia', NULL, 1, 'PENDING', NULL, 15, '2026-06-17 08:11:49', '2026-06-17 08:11:49'),
 (236, 88, 'Tombol panel (jika manual) berfungsi dengan baik', NULL, 2, 'PENDING', NULL, 15, '2026-06-17 08:11:49', '2026-06-17 08:11:49'),
 (237, 88, 'Layar monitor/tampilan digital menyala dengan jelas', NULL, 3, 'PENDING', NULL, 15, '2026-06-17 08:11:49', '2026-06-17 08:11:49'),
@@ -575,17 +574,20 @@ INSERT INTO `inspection_subitems` (`id`, `category_id`, `nama_subitem`, `deskrip
 (240, 89, 'Sumber cahaya UV dan Visible menyala normal (lampu deuterium dan tungsten)', NULL, 1, 'PENDING', NULL, 15, '2026-06-17 08:11:49', '2026-06-17 08:11:49'),
 (241, 90, 'Kompartemen bersih dari tumpahan cairan atau kotoran', NULL, 1, 'PENDING', NULL, 15, '2026-06-17 08:11:49', '2026-06-17 08:11:49'),
 (242, 90, 'Pegangan kuvet presisi dan tidak longgar', NULL, 2, 'PENDING', NULL, 15, '2026-06-17 08:14:20', '2026-06-17 08:14:20'),
-(243, 91, 'a', NULL, 1, 'PENDING', NULL, 11, '2026-06-17 09:36:57', '2026-06-17 09:36:57'),
 (244, 92, 's', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 05:45:46', '2026-06-18 05:45:46'),
-(246, 94, 'sd2', NULL, 1, 'PENDING', NULL, 3, '2026-06-18 05:47:31', '2026-06-18 05:47:31'),
-(247, 95, 'sd4', NULL, 1, 'PENDING', NULL, 3, '2026-06-18 05:47:31', '2026-06-18 05:47:31'),
 (248, 96, 'sd2', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 05:48:39', '2026-06-18 05:48:39'),
 (249, 97, 'sd4', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 05:48:39', '2026-06-18 05:48:39'),
 (250, 98, 'sx2', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 05:58:31', '2026-06-18 05:58:31'),
 (251, 99, 'sx4', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 05:58:31', '2026-06-18 05:58:31'),
 (252, 100, 'sz', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 06:09:05', '2026-06-18 06:09:05'),
 (253, 101, 'sv', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 06:10:27', '2026-06-18 06:10:27'),
-(255, 103, 'p', NULL, 1, 'PENDING', NULL, 11, '2026-06-18 08:14:06', '2026-06-18 08:14:06');
+(256, 104, 'coba', NULL, 1, 'PENDING', NULL, 11, '2026-06-26 04:18:58', '2026-06-26 04:18:58'),
+(257, 105, 's', NULL, 1, 'PENDING', NULL, 11, '2026-06-26 07:39:27', '2026-06-26 07:39:27'),
+(258, 106, 'sed123', NULL, 1, 'PENDING', NULL, 11, '2026-06-27 04:12:32', '2026-06-27 04:12:32'),
+(259, 107, 'saw', NULL, 1, 'PENDING', NULL, 3, '2026-06-27 04:28:39', '2026-06-27 04:28:39'),
+(263, 111, 'asdf', NULL, 1, 'PENDING', NULL, 3, '2026-06-27 04:33:09', '2026-06-27 04:33:09'),
+(265, 113, 'asdfg', NULL, 1, 'PENDING', NULL, 11, '2026-06-27 04:40:31', '2026-06-27 04:40:31'),
+(268, 116, 'awe', NULL, 1, 'PENDING', NULL, 3, '2026-06-27 04:48:19', '2026-06-27 04:48:19');
 
 -- --------------------------------------------------------
 
@@ -620,7 +622,9 @@ INSERT INTO `items` (`id`, `nama_barang`, `kode_barang`, `pembuat_alat`, `tangga
 (62, 's', 's34', 's', '2026-06-18', '2026-06-18 05:45:41', '2026-06-18 05:45:41'),
 (64, 'sd1', 'sd2', 'sd', '2026-06-18', '2026-06-18 05:48:27', '2026-06-18 05:48:27'),
 (65, 'sx', 'sx2', 'sx', '2026-06-18', '2026-06-18 05:58:15', '2026-06-18 05:58:15'),
-(66, 'sv', 'svs', 'sv', '2026-06-18', '2026-06-18 06:10:20', '2026-06-18 06:10:20');
+(66, 'sv', 'svs', 'sv', '2026-06-18', '2026-06-18 06:10:20', '2026-06-18 06:10:20'),
+(69, 'sed', 'sed123', 'sed', '2026-06-27', '2026-06-27 04:12:21', '2026-06-27 04:12:21'),
+(71, 'asdf', 'asdf123', 'asdf', '2026-06-27', '2026-06-27 04:40:23', '2026-06-27 04:40:23');
 
 -- --------------------------------------------------------
 
@@ -636,6 +640,7 @@ CREATE TABLE `laboratories` (
   `plp1_id` int(11) DEFAULT NULL,
   `plp2_id` int(11) DEFAULT NULL,
   `item_ids` varchar(1000) DEFAULT NULL,
+  `report_file` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
@@ -644,12 +649,12 @@ CREATE TABLE `laboratories` (
 -- Dumping data untuk tabel `laboratories`
 --
 
-INSERT INTO `laboratories` (`id`, `nama_lab`, `lokasi`, `kalab_id`, `plp1_id`, `plp2_id`, `item_ids`, `created_at`, `updated_at`) VALUES
-(10, 'PENGOLAHAN MAKAN', 'Gedung A lantai 3', 11, 24, 23, '30,41', '2026-06-10 06:07:25', '2026-06-22 07:26:19'),
-(11, 'LAB IPA', 'GEDUNG A LANTAI 9', 2, NULL, NULL, '21,29', '2026-06-12 03:33:55', '2026-06-13 12:49:37'),
-(12, 'COBA', 'COBA', 11, NULL, NULL, '31,42', '2026-06-15 04:06:35', '2026-06-15 08:50:34'),
-(13, 'LAB 1', 'LANTAI 3', 11, NULL, NULL, '62,64,65,66', '2026-06-15 07:49:03', '2026-06-19 07:56:19'),
-(14, 'LAB OTOMASI', 'Gedung J Lantai 5', 15, NULL, NULL, '57', '2026-06-17 08:04:19', '2026-06-17 08:07:28');
+INSERT INTO `laboratories` (`id`, `nama_lab`, `lokasi`, `kalab_id`, `plp1_id`, `plp2_id`, `item_ids`, `report_file`, `created_at`, `updated_at`) VALUES
+(10, 'PENGOLAHAN MAKAN', 'Gedung A lantai 3', 11, 24, 23, '30,41', '', '2026-06-10 06:07:25', '2026-06-27 04:58:27'),
+(11, 'LAB IPA', 'GEDUNG A LANTAI 9', NULL, NULL, NULL, '21,29', '', '2026-06-12 03:33:55', '2026-06-13 12:49:37'),
+(12, 'COBA', 'COBA', 11, NULL, NULL, '31,42,69', '', '2026-06-15 04:06:35', '2026-06-27 04:12:21'),
+(13, 'LAB 1', 'LANTAI 3', 11, NULL, NULL, '62,64,65,66,71', '/uploads/1782466996142.pdf', '2026-06-15 07:49:03', '2026-06-27 04:40:23'),
+(14, 'LAB OTOMASI', 'Gedung J Lantai 5', 15, NULL, NULL, '57', '', '2026-06-17 08:04:19', '2026-06-27 04:55:43');
 
 -- --------------------------------------------------------
 
@@ -689,14 +694,14 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `nip`, `email`, `password`, `role`, `created_at`, `updated_at`) VALUES
 (1, 'Admin PPNS', '', 'admin@ppns.ac.id', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36CHqg9C', 'admin', '2026-06-03 04:22:18', '2026-06-03 04:22:18'),
-(2, 'Kepala Lab Fisika', '197501012005011001', 'kalab.fisika@ppns.ac.id', '$2a$10$kCqWc5WXmvT5pqH5s5V9a.B3ZYN8hIQQZv3H1f8.N7u8O5p5H1Hp2', 'kalab', '2026-06-03 04:22:18', '2026-06-04 06:17:59'),
-(3, 'Admin Ganteng', '0000000022', 'admin3@ppns.ac.id', '$2a$10$P87mHC9W5CRPbaHcvP.3mO2ejseMtfVwtxLcuvF427f/6mRFnPiN6', 'admin', '2026-06-03 04:22:28', '2026-06-12 08:56:01'),
-(11, 'Vivin Setiani, S.T., M.Eng', '198909162015042020', 'kalab3@ppns.ac.id', '$2a$10$11BPO6ufPK8dqkJRu71w8O.SRwoqPOt8IwG7VKZJgN4q8d7Xi2I/2', 'kalab', '2026-06-04 06:28:02', '2026-06-12 08:56:01'),
+(3, 'Admin Ganteng', '0000000022', 'admin3@ppns.ac.id', '$2a$10$PxfyJNeYy3TA6IRaEWWfluf9N6r2f8VrJC4RpepXt/2pxHyiKdM4a', 'admin', '2026-06-03 04:22:28', '2026-06-26 06:27:00'),
+(11, 'Vivin Setiani, S.T., M.Eng', '198909162015042020', 'kalab3@ppns.ac.id', '$2a$10$11BPO6ufPK8dqkJRu71w8O.SRwoqPOt8IwG7VKZJgN4q8d7Xi2I/2', 'kalab', '2026-06-04 06:28:02', '2026-06-26 03:40:19'),
 (15, 'Medi', '123456789', 'Medi@ppns.ac.id', '$2a$10$pTCx2QH/CgpDJICVA8asqurY4Jm2g.6L8AhA7GwxptyXez0bHVAAC', 'kalab', '2026-06-17 08:03:30', '2026-06-17 08:03:30'),
 (16, 'sa', '112345788', 'sa123@gmail.com', '$2a$10$R5zrPcwBe31ABnTrTomOKemeXV4o/wqVgIJqEyyFpayPdtGMPrNYS', 'kalab', '2026-06-22 06:26:53', '2026-06-22 06:26:53'),
 (23, 'PLP 1', '123456', 'plp1@gmail.com', '$2a$10$09ZzOvEBmPnvBj8XhDaDU.VlPUUJqMZD.TWDAdZpryEgWA.KTXYFi', 'plp', '2026-06-22 07:23:07', '2026-06-22 07:23:07'),
 (24, 'PLP 2', '123456', 'plp2@gmail.com', '$2a$10$VmNrvspNmDRAaeeBXigTcuVA7Rnz1MILDm3rQL/X5w/CeJTGXWjpi', 'plp', '2026-06-22 07:23:33', '2026-06-22 07:23:33'),
-(25, 'saep', '1122334455', 'saep123@gmail.com', '$2a$10$zTremhOnh0L0lS/92ahZte66uIIfYTQudypUK5rYaYiG4SmgueIDq', 'plp', '2026-06-22 07:24:08', '2026-06-22 07:24:08');
+(25, 'saep', '1122334455', 'saep123@gmail.com', '$2a$10$zTremhOnh0L0lS/92ahZte66uIIfYTQudypUK5rYaYiG4SmgueIDq', 'plp', '2026-06-22 07:24:08', '2026-06-22 07:24:08'),
+(27, 'smean', '11223344', 'samean@ppns.ac.id', '$2a$10$EYqx3Yz4D/rBAkz1UXcheuXRNHcZNnU5pPDpjtrBAFFaWR0ylq1Ge', 'admin', '2026-06-26 03:21:51', '2026-06-26 03:21:51');
 
 --
 -- Indexes for dumped tables
@@ -796,37 +801,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `inspections`
 --
 ALTER TABLE `inspections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=209;
 
 --
 -- AUTO_INCREMENT untuk tabel `inspection_categories`
 --
 ALTER TABLE `inspection_categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT untuk tabel `inspection_monthly_reviews`
 --
 ALTER TABLE `inspection_monthly_reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT untuk tabel `inspection_results`
 --
 ALTER TABLE `inspection_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1022;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1039;
 
 --
 -- AUTO_INCREMENT untuk tabel `inspection_subitems`
 --
 ALTER TABLE `inspection_subitems`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=256;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=271;
 
 --
 -- AUTO_INCREMENT untuk tabel `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT untuk tabel `laboratories`
@@ -844,7 +849,7 @@ ALTER TABLE `schedules`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
