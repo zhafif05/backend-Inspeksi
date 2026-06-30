@@ -9,11 +9,11 @@ const {
   getProfile,
   updateProfile
 } = require('../controllers/authController');
-
+const { loginLimiter } = require("../middleware/rateLimit");
 const router = express.Router();
 
 // Public routes
-router.post('/login', validateLogin, handleValidationErrors, login);
+router.post('/login', validateLogin, handleValidationErrors, loginLimiter, login);
 
 // Protected routes
 router.get('/profile', verifyToken, getProfile);

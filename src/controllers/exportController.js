@@ -1306,7 +1306,6 @@ const exportLabItems = async (req, res, next) => {
       `attachment; filename="Export_${lab.nama_lab}.xlsx"`
     );
     await workbook.xlsx.write(res);
-    console.log("STEP 4 - Selesai");
     res.end();
 
 
