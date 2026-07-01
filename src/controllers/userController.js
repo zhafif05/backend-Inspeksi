@@ -33,7 +33,7 @@ const createUser = async (req, res, next) => {
       });
     }
 
-    const allowedRoles = ['admin', 'kalab', 'plp'];
+    const allowedRoles = ['admin', 'kalab', 'plp','teknisi'];
 
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({

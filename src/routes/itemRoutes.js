@@ -31,21 +31,21 @@ router.get('/:id', verifyToken, getItemById);
 // Create item (admin & kalab)
 router.post('/',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   createItem
 );
 
 // Update item (admin & kalab)
 router.put('/:id',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   updateItem
 );
 
 // Delete item (admin & kalab)
 router.delete('/:id',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   deleteItem
 );
 

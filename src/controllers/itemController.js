@@ -108,7 +108,7 @@ const getMyItems = async (req, res, next) => {
 
 const createItem = async (req, res, next) => {
   try {
-    const { nama_barang, kode_barang, pembuat_alat, tanggal_pembelian, laboratory_id } = req.body;
+    const { nama_barang, kode_barang, pembuat_alat, tanggal_pembelian, laboratory_id, tanggal_kalibrasi_terakhir,tanggal_kalibrasi_berikutnya } = req.body;
 
     if (!kode_barang) {
       return res.status(400).json({
@@ -118,8 +118,8 @@ const createItem = async (req, res, next) => {
     }
 
     const [result] = await pool.query(
-      'INSERT INTO items (nama_barang, kode_barang, pembuat_alat, tanggal_pembelian) VALUES (?, ?, ?, ?)',
-      [nama_barang, kode_barang, pembuat_alat || null, tanggal_pembelian || null]
+      'INSERT INTO items (nama_barang, kode_barang, pembuat_alat, tanggal_pembelian, tanggal_kalibrasi_terakhir, tanggal_kalibrasi_berikutnya) VALUES (?, ?, ?, ?, ?, ?)',
+      [nama_barang, kode_barang, pembuat_alat || null, tanggal_pembelian || null, tanggal_kalibrasi_terakhir || null, tanggal_kalibrasi_berikutnya || null]
     );
 
     const newItemId = result.insertId;
@@ -145,7 +145,9 @@ const createItem = async (req, res, next) => {
         nama_barang,
         kode_barang,
         pembuat_alat: pembuat_alat || null,
-        tanggal_pembelian: tanggal_pembelian || null
+        tanggal_pembelian: tanggal_pembelian || null,
+        tanggal_kalibrasi_terakhir: tanggal_kalibrasi_terakhir || null,
+        tanggal_kalibrasi_berikutnya: tanggal_kalibrasi_berikutnya || null
       }
     });
   } catch (err) {
@@ -157,7 +159,7 @@ const createItem = async (req, res, next) => {
 const updateItem = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { nama_barang, kode_barang, pembuat_alat, tanggal_pembelian } = req.body;
+    const { nama_barang, kode_barang, pembuat_alat, tanggal_pembelian, tanggal_kalibrasi_terakhir, tanggal_kalibrasi_berikutnya } = req.body;
 
     // Check if item exists
     const [items] = await pool.query('SELECT id FROM items WHERE id = ?', [id]);
@@ -170,8 +172,8 @@ const updateItem = async (req, res, next) => {
 
     // Update item
     await pool.query(
-      'UPDATE items SET nama_barang = ?, kode_barang = ?, pembuat_alat = ?, tanggal_pembelian = ? WHERE id = ?',
-      [nama_barang, kode_barang, pembuat_alat || null, tanggal_pembelian || null, id]
+      'UPDATE items SET nama_barang = ?, kode_barang = ?, pembuat_alat = ?, tanggal_pembelian = ?, tanggal_kalibrasi_terakhir = ?, tanggal_kalibrasi_berikutnya = ? WHERE id = ?',
+      [nama_barang, kode_barang, pembuat_alat || null, tanggal_pembelian || null, tanggal_kalibrasi_terakhir || null, tanggal_kalibrasi_berikutnya || null, id]
     );
 
     res.status(200).json({

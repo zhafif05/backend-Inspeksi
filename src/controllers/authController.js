@@ -32,13 +32,29 @@ const login = async (req, res, next) => {
     // Ambil lab dari tabel laboratories tempat kalab ini terdaftar
     let laboratory_id = null;
     let lab_name = null;
-    if (user.role === 'kalab') {
+
+    let column = null;
+
+    if (user.role === "kalab") {
+      column = "kalab_id";
+    } else if (user.role === "plp") {
+      column = "plp_id";
+    } else if (user.role === "teknisi") {
+      column = "teknisi_id";
+    }
+
+    if (column) {
       const [labs] = await pool.query(
-        'SELECT id, nama_lab FROM laboratories WHERE kalab_id = ?',
+        `SELECT id, nama_lab
+     FROM laboratories
+     WHERE ${column} = ?`,
         [user.id]
       );
-      laboratory_id = labs.length > 0 ? labs[0].id : null;
-      lab_name = labs.length > 0 ? labs[0].nama_lab : null;
+
+      if (labs.length > 0) {
+        laboratory_id = labs[0].id;
+        lab_name = labs[0].nama_lab;
+      }
     }
 
     const token = jwt.sign(
@@ -96,13 +112,29 @@ const getProfile = async (req, res, next) => {
 
     let laboratory_id = null;
     let lab_name = null;
-    if (user.role === 'kalab') {
+
+    let column = null;
+
+    if (user.role === "kalab") {
+      column = "kalab_id";
+    } else if (user.role === "plp") {
+      column = "plp_id";
+    } else if (user.role === "teknisi") {
+      column = "teknisi_id";
+    }
+
+    if (column) {
       const [labs] = await pool.query(
-        'SELECT id, nama_lab FROM laboratories WHERE kalab_id = ?',
+        `SELECT id, nama_lab
+     FROM laboratories
+     WHERE ${column} = ?`,
         [user.id]
       );
-      laboratory_id = labs.length > 0 ? labs[0].id : null;
-      lab_name = labs.length > 0 ? labs[0].nama_lab : null;
+
+      if (labs.length > 0) {
+        laboratory_id = labs[0].id;
+        lab_name = labs[0].nama_lab;
+      }
     }
 
     res.status(200).json({

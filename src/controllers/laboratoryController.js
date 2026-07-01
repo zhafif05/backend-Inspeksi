@@ -3,13 +3,13 @@ const pool = require('../config/database');
 const getAllLaboratories = async (req, res, next) => {
   try {
     const [labs] = await pool.query(
-      `SELECT l.id, l.nama_lab, l.lokasi, l.kalab_id,l.plp1_id, l.plp2_id,
-              u.name as penanggung_jawab, u.name as kalab_name, u.nip as nip_penanggung_jawab,plp1.name AS plp1_name, plp2.name AS plp2_name,
+      `SELECT l.id, l.nama_lab, l.lokasi, l.kalab_id,l.plp_id, l.teknisi_id,
+              u.name as penanggung_jawab, u.name as kalab_name, u.nip as nip_penanggung_jawab,plp.name AS plp_name,teknisi.name AS teknisi_name,
               l.item_ids, l.report_file, l.created_at, l.updated_at
        FROM laboratories l
        LEFT JOIN users u ON l.kalab_id = u.id
-       LEFT JOIN users plp1 ON l.plp1_id = plp1.id
-       LEFT JOIN users plp2 ON l.plp2_id = plp2.id
+       LEFT JOIN users plp ON l.plp_id = plp.id
+       LEFT JOIN users teknisi ON l.teknisi_id = teknisi.id  
        ORDER BY l.created_at DESC`
     );
     // Ambil detail items dari item_ids (CSV)
@@ -39,7 +39,7 @@ const getAllLaboratories = async (req, res, next) => {
 
 const createLaboratory = async (req, res, next) => {
   try {
-    const { nama_lab, lokasi, kalab_id, plp1_id, plp2_id, item_ids } = req.body;
+    const { nama_lab, lokasi, kalab_id, plp_id,   teknisi_id, item_ids } = req.body;
 
     if (kalab_id) {
       const [users] = await pool.query(
@@ -47,11 +47,11 @@ const createLaboratory = async (req, res, next) => {
         [kalab_id, 'kalab']
       );
       // Validasi PLP 1
-      if (plp1_id) {
+      if (plp_id) {
 
         const [users] = await pool.query(
           'SELECT id FROM users WHERE id = ? AND role = ?',
-          [plp1_id, 'plp']
+          [plp_id, 'plp']
         );
 
         if (users.length === 0) {
@@ -64,11 +64,11 @@ const createLaboratory = async (req, res, next) => {
       }
 
       // Validasi PLP 2
-      if (plp2_id) {
+      if (teknisi_id) {
 
         const [users] = await pool.query(
           'SELECT id FROM users WHERE id = ? AND role = ?',
-          [plp2_id, 'plp']
+          [teknisi_id, 'teknisi']
         );
 
         if (users.length === 0) {
@@ -90,8 +90,8 @@ const createLaboratory = async (req, res, next) => {
     const itemIds = Array.isArray(item_ids) ? item_ids.join(',') : (item_ids || null);
 
     const [result] = await pool.query(
-      'INSERT INTO laboratories (nama_lab, lokasi, kalab_id, plp1_id, plp2_id, item_ids) VALUES (?, ?, ?, ?, ?, ?)',
-      [nama_lab, lokasi, kalab_id || null, plp1_id || null, plp2_id || null, itemIds]
+      'INSERT INTO laboratories (nama_lab, lokasi, kalab_id, plp_id, teknisi_id, item_ids) VALUES (?, ?, ?, ?, ?, ?)',
+      [nama_lab, lokasi, kalab_id || null, plp_id || null, teknisi_id || null, itemIds]
     );
 
     res.status(201).json({
@@ -102,8 +102,8 @@ const createLaboratory = async (req, res, next) => {
         nama_lab,
         lokasi,
         kalab_id: kalab_id || null,
-        plp1_id: plp1_id || null,
-        plp2_id: plp2_id || null,
+        plp_id: plp_id || null,
+        teknisi_id: teknisi_id || null,
         item_ids: itemIds
       }
     });
@@ -115,7 +115,7 @@ const createLaboratory = async (req, res, next) => {
 const updateLaboratory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { nama_lab, lokasi, kalab_id, plp1_id, plp2_id, item_ids } = req.body;
+    const { nama_lab, lokasi, kalab_id, plp_id, teknisi_id, item_ids } = req.body;
 
     const [labs] = await pool.query(
       'SELECT id FROM laboratories WHERE id = ?',
@@ -134,34 +134,34 @@ const updateLaboratory = async (req, res, next) => {
         [kalab_id, 'kalab']
       );
       // Validasi PLP 1
-      if (plp1_id) {
+      if (plp_id) {
 
         const [users] = await pool.query(
           'SELECT id FROM users WHERE id = ? AND role = ?',
-          [plp1_id, 'plp']
+          [plp_id, 'plp']
         );
 
         if (users.length === 0) {
           return res.status(404).json({
             success: false,
-            message: 'PLP 1 tidak ditemukan'
+            message: 'PLP tidak ditemukan'
           });
         }
 
       }
 
       // Validasi PLP 2
-      if (plp2_id) {
+      if (teknisi_id) {
 
         const [users] = await pool.query(
           'SELECT id FROM users WHERE id = ? AND role = ?',
-          [plp2_id, 'plp']
+          [teknisi_id, 'teknisi']
         );
 
         if (users.length === 0) {
           return res.status(404).json({
             success: false,
-            message: 'PLP 2 tidak ditemukan'
+            message: 'Teknisi tidak ditemukan'
           });
         }
 
@@ -180,13 +180,13 @@ const updateLaboratory = async (req, res, next) => {
 
     if (itemIds !== null) {
       await pool.query(
-        'UPDATE laboratories SET nama_lab = ?, lokasi = ?, kalab_id = ?, plp1_id = ?, plp2_id = ?, item_ids = ? WHERE id = ?',
-        [nama_lab, lokasi, kalab_id || null, plp1_id || null, plp2_id || null, itemIds, id]
+        'UPDATE laboratories SET nama_lab = ?, lokasi = ?, kalab_id = ?, plp_id = ?, teknisi_id = ?, item_ids = ? WHERE id = ?',
+        [nama_lab, lokasi, kalab_id || null, plp_id || null, teknisi_id || null, itemIds, id]
       );
     } else {
       await pool.query(
-        'UPDATE laboratories SET nama_lab = ?, lokasi = ?, kalab_id = ?, plp1_id = ?, plp2_id = ? WHERE id = ?',
-        [nama_lab, lokasi, kalab_id || null, plp1_id || null, plp2_id || null, id]
+        'UPDATE laboratories SET nama_lab = ?, lokasi = ?, kalab_id = ?, plp_id = ?, teknisi_id = ? WHERE id = ?',
+        [nama_lab, lokasi, kalab_id || null, plp_id || null, teknisi_id || null, id]
       );
     }
 
@@ -195,8 +195,8 @@ const updateLaboratory = async (req, res, next) => {
       message: 'Laboratorium berhasil diperbarui',
       data: {
         kalab_id: kalab_id || null,
-        plp1_id: plp1_id || null,
-        plp2_id: plp2_id || null,
+        plp_id: plp_id || null,
+        teknisi_id: teknisi_id || null,
         item_ids: item_ids || []
       }
     });

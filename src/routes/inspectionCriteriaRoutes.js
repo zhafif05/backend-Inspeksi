@@ -10,7 +10,7 @@ const { validateInspectionCategory, validateInspectionSubitem, validateInspectio
 router.post(
   '/category/create',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   validateInspectionCategory,
   handleValidationErrors,
   inspectionCriteriaController.createInspectionCategory
@@ -20,7 +20,7 @@ router.post(
 router.post(
   '/subitem/create',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   validateInspectionSubitem,
   handleValidationErrors,
   inspectionCriteriaController.createInspectionSubitem
@@ -30,7 +30,7 @@ router.post(
 router.post(
   '/category-with-subitems/create',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   validateInspectionCategoryWithSubitems,
   handleValidationErrors,
   inspectionCriteriaController.createInspectionCategoryWithSubitems
@@ -40,7 +40,7 @@ router.post(
 router.put(
   '/category/:id/update',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   validateInspectionCategory,
   handleValidationErrors,
   inspectionCriteriaController.updateCategory
@@ -50,7 +50,7 @@ router.put(
 router.put(
   '/subitem/:id/update',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   validateInspectionSubitem,
   handleValidationErrors,
   inspectionCriteriaController.updateSubitem
@@ -60,7 +60,7 @@ router.put(
 router.put(
   '/category-with-subitems/:id/update',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   validateUpdateCategoryWithSubitems,
   handleValidationErrors,
   inspectionCriteriaController.updateCategoryWithSubitems
@@ -72,7 +72,7 @@ router.put(
 router.get(
   '/my',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab' , 'teknisi', 'plp'),
   inspectionCriteriaController.getMyCriteriaWithSubitems
 );
 

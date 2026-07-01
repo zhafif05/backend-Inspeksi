@@ -10,7 +10,7 @@ const { exportInspection, exportAllCompleted, checkLabInspectionsStatus, exportL
 router.post(
   '/create',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   multerUpload.single('foto'),
   inspectionDetailController.createInspectionWithChecklist
 );
@@ -25,7 +25,7 @@ router.get('/month/:bulan_ke', verifyToken, inspectionDetailController.getInspec
 router.put(
   '/:id/results',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp' ),
   inspectionDetailController.updateInspectionResults
 );
 
@@ -33,7 +33,7 @@ router.put(
 router.put(
   '/result/:resultId',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   inspectionDetailController.updateInspectionResult
 );
 
@@ -151,7 +151,7 @@ router.get(
 router.get(
   '/export/:id',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   exportInspection
 );
 
@@ -159,7 +159,7 @@ router.get(
 router.get(
   '/export-lab',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   exportLabItems
 );
 
@@ -167,7 +167,7 @@ router.get(
 router.get(
   '/export-all',
   verifyToken,
-  authorizeRole('admin', 'kalab'),
+  authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   exportAllCompleted
 );
 
