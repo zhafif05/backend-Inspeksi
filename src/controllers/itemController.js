@@ -106,9 +106,40 @@ const getMyItems = async (req, res, next) => {
   }
 };
 
+const getCalibrationAlerts = async (req, res, next) => {
+  try {
+    const [rows] = await pool.query(`
+    SELECT
+        i.id,
+        i.nama_barang,
+        i.kode_barang,
+        i.tanggal_kalibrasi_berikutnya,
+        l.id AS laboratory_id,
+        l.nama_lab
+        FROM laboratories l
+        JOIN items i
+        ON FIND_IN_SET(i.id, l.item_ids)
+        WHERE
+        i.tanggal_kalibrasi_berikutnya IS NOT NULL
+        AND i.tanggal_kalibrasi_berikutnya <= CURDATE()
+        ORDER BY
+            i.tanggal_kalibrasi_berikutnya ASC
+        `);
+
+    res.json({
+      success: true,
+      total: rows.length,
+      data: rows,
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 const createItem = async (req, res, next) => {
   try {
-    const { nama_barang, kode_barang, pembuat_alat, tanggal_pembelian, laboratory_id, tanggal_kalibrasi_terakhir,tanggal_kalibrasi_berikutnya } = req.body;
+    const { nama_barang, kode_barang, pembuat_alat, tanggal_pembelian, laboratory_id, tanggal_kalibrasi_terakhir, tanggal_kalibrasi_berikutnya } = req.body;
 
     if (!kode_barang) {
       return res.status(400).json({
@@ -299,6 +330,8 @@ const deleteItem = async (req, res, next) => {
   }
 };
 
+
+
 module.exports = {
   getAllItems,
   getItemsByLab,
@@ -306,5 +339,7 @@ module.exports = {
   getItemById,
   createItem,
   updateItem,
-  deleteItem
+  deleteItem,
+  getCalibrationAlerts
+
 };

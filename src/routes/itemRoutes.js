@@ -11,7 +11,8 @@ const {
   getItemById,
   createItem,
   updateItem,
-  deleteItem
+  deleteItem,
+  getCalibrationAlerts
 } = require('../controllers/itemController');
 
 const router = express.Router();
@@ -24,6 +25,13 @@ router.get('/lab/:laboratoryId', verifyToken, getItemsByLab);
 
 // Get my items (items created by logged-in user)
 router.get('/my', verifyToken, getMyItems);
+
+router.get(
+    "/calibration-alerts",
+    verifyToken,
+    authorizeRole("admin"),
+    getCalibrationAlerts
+);
 
 // Get item by ID
 router.get('/:id', verifyToken, getItemById);
@@ -48,5 +56,6 @@ router.delete('/:id',
   authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
   deleteItem
 );
+
 
 module.exports = router;
