@@ -35,8 +35,8 @@ const createInspectionWithChecklist = async (req, res, next) => {
         });
       }
       const [labCheck] = await pool.query(
-        'SELECT id FROM laboratories WHERE id = ? AND kalab_id = ?',
-        [laboratory_id, req.user.id]
+        'SELECT id FROM laboratories WHERE id = ? AND kalab_id = ? OR plp_id = ? OR teknisi_id = ?',
+        [laboratory_id, req.user.id, req.user.id, req.user.id]
       );
       if (labCheck.length === 0) {
         if (req.file) fs.unlinkSync(req.file.path);

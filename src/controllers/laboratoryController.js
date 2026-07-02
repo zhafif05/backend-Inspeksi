@@ -39,7 +39,7 @@ const getAllLaboratories = async (req, res, next) => {
 
 const createLaboratory = async (req, res, next) => {
   try {
-    const { nama_lab, lokasi, kalab_id, plp_id,   teknisi_id, item_ids } = req.body;
+    const { nama_lab, lokasi, kalab_id, plp_id, teknisi_id, item_ids } = req.body;
 
     if (kalab_id) {
       const [users] = await pool.query(
@@ -206,28 +206,123 @@ const updateLaboratory = async (req, res, next) => {
 };
 
 const deleteLaboratory = async (req, res, next) => {
+  const connection = await pool.getConnection();
   try {
-    const { id } = req.params;
+    await connection.beginTransaction();
 
-    const [labs] = await pool.query(
-      'SELECT id FROM laboratories WHERE id = ?',
+    const { id } = req.params;
+    const [labData] = await connection.query(
+      "SELECT item_ids FROM laboratories WHERE id = ?",
       [id]
     );
-    if (labs.length === 0) {
+
+    if (labData.length === 0) {
+      await connection.rollback();
+
       return res.status(404).json({
         success: false,
-        message: 'Laboratorium tidak ditemukan'
+        message: "Laboratorium tidak ditemukan",
       });
     }
 
-    await pool.query('DELETE FROM laboratories WHERE id = ?', [id]);
+    const itemIds = labData[0]?.item_ids
+      ? labData[0].item_ids
+        .split(",")
+        .map((x) => Number(x.trim()))
+        .filter((x) => !isNaN(x))
+      : [];
+
+    // Ambil semua inspection milik laboratorium
+    const [inspections] = await connection.query(
+      `
+      SELECT id
+      FROM inspections
+      WHERE laboratory_id = ?
+      `,
+      [id]
+    );
+
+    const inspectionIds = inspections.map(i => i.id);
+
+    if (inspectionIds.length > 0) {
+
+      // Hapus hasil inspeksi
+      await connection.query(
+        `
+    DELETE FROM inspection_results
+    WHERE inspection_id IN (?)
+    `,
+        [inspectionIds]
+      );
+
+      // Hapus review bulanan
+      await connection.query(
+        `
+    DELETE FROM inspection_monthly_reviews
+    WHERE inspection_id IN (?)
+    `,
+        [inspectionIds]
+      );
+
+      // Hapus inspeksi
+      await connection.query(
+        `
+    DELETE FROM inspections
+    WHERE id IN (?)
+    `,
+        [inspectionIds]
+      );
+    }
+
+    if (itemIds.length > 0) {
+
+      await connection.query(
+        `
+    DELETE s
+    FROM inspection_subitems s
+    INNER JOIN inspection_categories c
+        ON c.id = s.category_id
+    WHERE c.item_id IN (?)
+    `,
+        [itemIds]
+      );
+
+      await connection.query(
+        `
+    DELETE FROM inspection_categories
+    WHERE item_id IN (?)
+    `,
+        [itemIds]
+      );
+
+      await connection.query(
+        `
+    DELETE FROM items
+    WHERE id IN (?)
+    `,
+        [itemIds]
+      );
+    }
+
+    await connection.query(
+      `
+  DELETE FROM laboratories
+  WHERE id = ?
+  `,
+      [id]
+    );
+
+    await connection.commit();
 
     res.status(200).json({
       success: true,
       message: 'Laboratorium berhasil dihapus'
     });
   } catch (err) {
+    await connection.rollback();
     next(err);
+  } finally {
+    connection.release();
   }
 };
 

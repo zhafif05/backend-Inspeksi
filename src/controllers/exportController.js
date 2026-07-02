@@ -52,15 +52,15 @@ const exportInspection = async (req, res, next) => {
     const [inspections] = await pool.query(
       `SELECT i.*, u.name as inspector_name, l.nama_lab, l.lokasi,
               kalab.name as penanggung_jawab, kalab.nip,
-              plp1.name AS plp1_name, plp1.nip AS plp1_nip,
-              plp2.name AS plp2_name, plp2.nip AS plp2_nip,
+              plp.name AS plp_name, plp.nip AS plp_nip,
+              teknisi.name AS teknisi_name, teknisi.nip AS teknisi_nip,
               it.nama_barang, it.kode_barang, it.pembuat_alat, it.tanggal_pembelian
        FROM inspections i
        LEFT JOIN users u ON i.inspector_id = u.id
        LEFT JOIN laboratories l ON i.laboratory_id = l.id
        LEFT JOIN users kalab ON l.kalab_id = kalab.id
-       LEFT JOIN users plp1 ON l.plp1_id = plp1.id
-       LEFT JOIN users plp2 ON l.plp2_id = plp2.id
+       LEFT JOIN users plp ON l.plp_id = plp.id
+        LEFT JOIN users teknisi ON l.teknisi_id = teknisi.id
        LEFT JOIN items it ON i.item_id = it.id
        WHERE i.id = ?`, [id]
     );
@@ -306,8 +306,8 @@ const exportInspection = async (req, res, next) => {
         name: 'Calibri', size: 11, bold: false, color: { argb: 'FF000000' }
       };
     }
-    if (inspection.plp1_name) {
-      sheet.getCell(`G${kalabNameRow}`).value = inspection.plp1_name;
+    if (inspection.plp_name) {
+      sheet.getCell(`G${kalabNameRow}`).value = inspection.plp_name;
 
       sheet.getCell(`G${kalabNameRow}`).font = {
         name: "Calibri",
@@ -318,11 +318,11 @@ const exportInspection = async (req, res, next) => {
       };
 
       sheet.getCell(`G${kalabNipRow}`).value =
-        `NIP. ${inspection.plp1_nip || "-"}`;
+        `NIP. ${inspection.plp_nip || "-"}`;
     }
 
-    if (inspection.plp2_name) {
-      sheet.getCell(`P${kalabNameRow}`).value = inspection.plp2_name;
+    if (inspection.teknisi_name) {
+      sheet.getCell(`P${kalabNameRow}`).value = inspection.teknisi_name;
 
       sheet.getCell(`P${kalabNameRow}`).font = {
         name: "Calibri",
@@ -333,7 +333,7 @@ const exportInspection = async (req, res, next) => {
       };
 
       sheet.getCell(`P${kalabNipRow}`).value =
-        `NIP. ${inspection.plp2_nip || "-"}`;
+        `NIP. ${inspection.teknisi_nip || "-"}`;
     }
 
     // =============================
@@ -795,22 +795,22 @@ const exportLabItems = async (req, res, next) => {
           kalab.name AS kalab_name,
           kalab.nip AS kalab_nip,
 
-          plp1.name AS plp1_name,
-          plp1.nip AS plp1_nip,
+          plp.name AS plp_name,
+          plp.nip AS plp_nip,
 
-          plp2.name AS plp2_name,
-          plp2.nip AS plp2_nip
+          teknisi.name AS teknisi_name,
+          teknisi.nip AS teknisi_nip
 
       FROM laboratories l
 
       LEFT JOIN users kalab
           ON l.kalab_id = kalab.id
 
-      LEFT JOIN users plp1
-          ON l.plp1_id = plp1.id
+      LEFT JOIN users plp
+          ON l.plp_id = plp.id
 
-      LEFT JOIN users plp2
-          ON l.plp2_id = plp2.id
+      LEFT JOIN users teknisi
+          ON l.teknisi_id = teknisi.id
 
       WHERE l.id = ?
   `,
@@ -1219,8 +1219,8 @@ const exportLabItems = async (req, res, next) => {
           name: 'Calibri', size: 11, bold: true, underline: true, color: { argb: 'FF000000' }
         };
       }
-      if (lab.plp1_name) {
-        sheet.getCell(`G${kalabNameRow}`).value = lab.plp1_name;
+      if (lab.plp_name) {
+        sheet.getCell(`G${kalabNameRow}`).value = lab.plp_name;
 
         sheet.getCell(`G${kalabNameRow}`).font = {
           name: "Calibri",
@@ -1231,11 +1231,11 @@ const exportLabItems = async (req, res, next) => {
         };
 
         sheet.getCell(`G${kalabNipRow}`).value =
-          `NIP. ${lab.plp1_nip || "-"}`;
+          `NIP. ${lab.plp_nip || "-"}`;
       }
 
-      if (lab.plp2_name) {
-        sheet.getCell(`P${kalabNameRow}`).value = lab.plp2_name;
+      if (lab.teknisi_name) {
+        sheet.getCell(`P${kalabNameRow}`).value = lab.teknisi_name;
 
         sheet.getCell(`P${kalabNameRow}`).font = {
           name: "Calibri",
@@ -1246,7 +1246,7 @@ const exportLabItems = async (req, res, next) => {
         };
 
         sheet.getCell(`P${kalabNipRow}`).value =
-          `NIP. ${lab.plp2_nip || "-"}`;
+          `NIP. ${lab.teknisi_nip || "-"}`;
       }
       if (inspection.nip) {
         const nipCell = sheet.getCell(`A${kalabNipRow}`);
