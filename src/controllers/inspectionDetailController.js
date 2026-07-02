@@ -1183,7 +1183,7 @@ const checkInspectionByItemId = async (req, res, next) => {
       params.push(semester);
     }
     const [rows] = await pool.query(
-      `SELECT i.id, i.tahun, i.semester, imr.review_status, imr.alasan_penolakan,
+      `SELECT i.id, i.tahun, i.semester, imr.review_status, imr.bulan_ke, imr.alasan_penolakan,
                EXISTS(SELECT 1 FROM inspection_monthly_reviews WHERE inspection_id = i.id AND review_status = 'APPROVED') as has_approved_month,
                (SELECT COUNT(DISTINCT bulan_ke) FROM inspection_results WHERE inspection_id = i.id) as filled_months
         FROM inspections i
@@ -1193,6 +1193,88 @@ const checkInspectionByItemId = async (req, res, next) => {
         LIMIT 1`,
       params
     );
+
+    const [categoryPending] = await pool.query(
+      `
+      SELECT COUNT(*) total
+      FROM inspection_categories
+      WHERE item_id = ?
+      AND status = 'PENDING'
+      `,
+      [item_id]
+    );
+
+    let pendingCount = Number(categoryPending[0].total);
+
+    if (rows.length > 0) {
+      const inspectionId = rows[0].id;
+
+      const [reviewPending] = await pool.query(
+        `
+      SELECT COUNT(*) total
+      FROM inspection_monthly_reviews
+      WHERE inspection_id = ?
+      AND review_status = 'PENDING'
+      `,
+        [inspectionId]
+      );
+
+      const [subPending] = await pool.query(
+        `
+      SELECT COUNT(*) total
+      FROM inspection_results
+      WHERE inspection_id = ?
+      AND approval_status = 'PENDING'
+      `,
+        [inspectionId]
+      );
+
+      pendingCount +=
+        Number(reviewPending[0].total) +
+        Number(subPending[0].total);
+    }
+
+    const [rejectedCategory] = await pool.query(
+      `
+    SELECT COUNT(*) total
+    FROM inspection_categories
+    WHERE item_id = ?
+    AND status = 'REJECTED'
+    `,
+      [item_id]
+    );
+
+    let rejectedInspectionCount = 0;
+
+    if (rows.length > 0) {
+      const inspectionId = rows[0].id;
+
+      const [rejectReview] = await pool.query(
+        `
+    SELECT COUNT(*) total
+    FROM inspection_monthly_reviews
+    WHERE inspection_id = ?
+    AND review_status = 'REJECTED'
+    `,
+        [inspectionId]
+      );
+
+      rejectedInspectionCount = Number(rejectReview[0].total);
+    }
+
+    let needFillNextMonth = false;
+
+    if (rows.length > 0) {
+      const latestApproved = rows[0].filled_months;
+
+      if (
+        rows[0].review_status === "APPROVED" &&
+        latestApproved < 6
+      ) {
+        needFillNextMonth = true;
+      }
+    }
+
     res.status(200).json({
       success: true,
       exists: rows.length > 0,
@@ -1202,7 +1284,12 @@ const checkInspectionByItemId = async (req, res, next) => {
       review_status: rows.length > 0 ? rows[0].review_status : null,
       alasan_penolakan: rows.length > 0 ? rows[0].alasan_penolakan : null,
       has_approved_month: rows.length > 0 ? Boolean(rows[0].has_approved_month) : false,
-      filled_months: rows.length > 0 ? Number(rows[0].filled_months) : 0
+      filled_months: rows.length > 0 ? Number(rows[0].filled_months) : 0,
+      pendingCount: pendingCount,
+      hasPending: pendingCount > 0,
+      hasRejectedCategory: Number(rejectedCategory[0].total) > 0,
+      hasRejectedInspection: rejectedInspectionCount > 0,
+      needFillNextMonth,
     });
   } catch (err) {
     next(err);
@@ -1220,6 +1307,7 @@ const getLabSemesters = async (req, res, next) => {
        ORDER BY i.tahun DESC, i.semester DESC`,
       [laboratoryId]
     );
+
     res.status(200).json({ success: true, data: rows });
   } catch (err) {
     next(err);
