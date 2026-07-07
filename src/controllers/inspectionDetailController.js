@@ -7,18 +7,58 @@ const path = require('path');
 // Get all inspection categories with subitems
 // ==================== INSPECTIONS WITH DETAILS ====================
 
+const getUploadedFile = (req, fieldname) => {
+  if (req.file && req.file.fieldname === fieldname) {
+    return req.file;
+  }
+  if (Array.isArray(req.files)) {
+    return req.files.find(file => file.fieldname === fieldname) || null;
+  }
+  if (req.files && Array.isArray(req.files[fieldname])) {
+    return req.files[fieldname][0] || null;
+  }
+  return null;
+};
+
+const deleteUploadedFiles = (req) => {
+  const files = [];
+  if (req.file) {
+    files.push(req.file);
+  }
+  if (Array.isArray(req.files)) {
+    files.push(...req.files);
+  } else if (req.files && typeof req.files === 'object') {
+    Object.values(req.files).forEach(value => {
+      if (Array.isArray(value)) {
+        files.push(...value);
+      }
+    });
+  }
+
+  files.forEach(file => {
+    if (file && file.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+  });
+};
+
 // Create inspection with checklist results
 const createInspectionWithChecklist = async (req, res, next) => {
+  let connection;
   try {
     const { item_id, catatan } = req.body;
-    let { checklist_results } = req.body;
+    let { checklist_results, results, damageReports } = req.body;
+    if (!checklist_results && results) {
+      checklist_results = results;
+    }
     const inspectorId = req.user.id;
-    const foto = req.file ? `/uploads/${req.file.filename}` : null;
+    const inspectionPhoto = getUploadedFile(req, 'foto');
+    const foto = inspectionPhoto ? `/uploads/${inspectionPhoto.filename}` : null;
 
     let laboratory_id;
     if (req.user.role === 'admin') {
       if (!req.body.laboratory_id) {
-        if (req.file) fs.unlinkSync(req.file.path);
+        deleteUploadedFiles(req);
         return res.status(400).json({
           success: false,
           message: 'Admin harus mengisi laboratory_id'
@@ -28,7 +68,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
     } else {
       laboratory_id = req.body.laboratory_id || req.user.laboratory_id;
       if (!laboratory_id) {
-        if (req.file) fs.unlinkSync(req.file.path);
+        deleteUploadedFiles(req);
         return res.status(400).json({
           success: false,
           message: 'Anda tidak terdaftar di laboratorium manapun'
@@ -39,7 +79,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
         [laboratory_id, req.user.id, req.user.id, req.user.id]
       );
       if (labCheck.length === 0) {
-        if (req.file) fs.unlinkSync(req.file.path);
+        deleteUploadedFiles(req);
         return res.status(403).json({
           success: false,
           message: 'Anda tidak memiliki akses ke laboratorium ini'
@@ -52,12 +92,28 @@ const createInspectionWithChecklist = async (req, res, next) => {
       try {
         checklist_results = JSON.parse(checklist_results);
       } catch (e) {
-        if (req.file) fs.unlinkSync(req.file.path);
+        deleteUploadedFiles(req);
         return res.status(400).json({
           success: false,
           message: 'Format checklist_results JSON tidak valid'
         });
       }
+    }
+
+    // Parse damageReports if it's a string (from form-data)
+    if (typeof damageReports === 'string') {
+      try {
+        damageReports = JSON.parse(damageReports);
+      } catch (e) {
+        deleteUploadedFiles(req);
+        return res.status(400).json({
+          success: false,
+          message: 'Format damageReports JSON tidak valid'
+        });
+      }
+    }
+    if (!damageReports || typeof damageReports !== 'object' || Array.isArray(damageReports)) {
+      damageReports = {};
     }
 
     // Check if any category is PENDING or REJECTED
@@ -67,7 +123,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
       [item_id]
     );
     if (Number(nonApprovedCategories[0].count) > 0) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      deleteUploadedFiles(req);
       return res.status(400).json({
         success: false,
         message: 'Tidak dapat membuat inspeksi karena masih ada kategori yang PENDING atau REJECTED. Harap tunggu persetujuan admin.'
@@ -76,7 +132,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
 
     // Validate required fields
     if (!item_id) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      deleteUploadedFiles(req);
       return res.status(400).json({
         success: false,
         message: 'Field item_id harus diisi'
@@ -103,7 +159,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
       [item_id, inspectionYear, semester]
     );
     if (existing.length > 0) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      deleteUploadedFiles(req);
       return res.status(400).json({
         success: false,
         message: 'Inspeksi untuk item ini sudah ada. Gunakan endpoint update untuk mengubah hasil.'
@@ -116,7 +172,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
       [item_id]
     );
     if (items.length === 0) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      deleteUploadedFiles(req);
       return res.status(404).json({
         success: false,
         message: 'Barang tidak ditemukan'
@@ -129,15 +185,18 @@ const createInspectionWithChecklist = async (req, res, next) => {
       [laboratory_id, item_id]
     );
     if (labs.length === 0) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      deleteUploadedFiles(req);
       return res.status(403).json({
         success: false,
         message: 'Barang bukan milik laboratorium Anda'
       });
     }
 
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
     // Insert inspection
-    const [inspectionResult] = await pool.query(
+    const [inspectionResult] = await connection.query(
       `INSERT INTO inspections 
        (laboratory_id, item_id, tahun, semester, inspector_id, tanggal_inspeksi, catatan, foto) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -150,7 +209,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
     if (checklist_results && Array.isArray(checklist_results) && checklist_results.length > 0) {
       const monthsSet = new Set(checklist_results.map(r => r.bulan_ke || 1));
       for (const bln of monthsSet) {
-        await pool.query(
+        await connection.query(
           `INSERT INTO inspection_monthly_reviews (inspection_id, bulan_ke, review_status)
            VALUES (?, ?, 'PENDING')
            ON DUPLICATE KEY UPDATE review_status = 'PENDING'`,
@@ -161,7 +220,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
 
     // Auto-populate results from approved subitems for 6 months
     if (!checklist_results || !Array.isArray(checklist_results) || checklist_results.length === 0) {
-      const [approvedSubitems] = await pool.query(
+      const [approvedSubitems] = await connection.query(
         `SELECT si.id, si.nama_subitem FROM inspection_subitems si
          JOIN inspection_categories c ON si.category_id = c.id
          WHERE (c.laboratory_id = ? OR c.laboratory_id IS NULL OR c.created_by = ?) AND si.status = 'APPROVED' AND c.status = 'APPROVED'
@@ -171,7 +230,7 @@ const createInspectionWithChecklist = async (req, res, next) => {
 
       let totalRows = 0;
       for (const sub of approvedSubitems) {
-        await pool.query(
+        await connection.query(
           `INSERT INTO inspection_results (inspection_id, subitem_id, bulan_ke, status, keterangan)
            VALUES (?, ?, 1, NULL, NULL)`,
           [inspectionId, sub.id]
@@ -180,11 +239,15 @@ const createInspectionWithChecklist = async (req, res, next) => {
       }
 
       // Create review record for bulan 1
-      await pool.query(
+      await connection.query(
         `INSERT INTO inspection_monthly_reviews (inspection_id, bulan_ke, review_status)
          VALUES (?, 1, 'PENDING')`,
         [inspectionId]
       );
+
+      await connection.commit();
+      connection.release();
+      connection = null;
 
       return res.status(201).json({
         success: true,
@@ -217,12 +280,57 @@ const createInspectionWithChecklist = async (req, res, next) => {
         continue;
       }
 
-      await pool.query(
+      const [inspectionResultRow] = await connection.query(
         `INSERT INTO inspection_results 
          (inspection_id, subitem_id, bulan_ke, status, keterangan)
          VALUES (?, ?, ?, ?, ?)`,
         [inspectionId, subitem_id, bln, normalizedStatus, keterangan || null]
       );
+
+      const damageReport = damageReports[subitem_id] || damageReports[String(subitem_id)];
+      if (normalizedStatus === 'K' && damageReport) {
+        const damagePhoto = getUploadedFile(req, `damage_report_foto_${subitem_id}`);
+        const [[subitem]] = await connection.query(
+          `SELECT category_id
+           FROM inspection_subitems
+           WHERE id = ?
+           LIMIT 1`,
+          [subitem_id]
+        );
+
+        if (!subitem) {
+          throw new Error(`Subitem ${subitem_id} tidak ditemukan`);
+        }
+
+        await connection.query(
+          `INSERT INTO inspection_damage_reports
+           (
+             inspection_result_id,
+             inspection_id,
+             laboratory_id,
+             item_id,
+             category_id,
+             subitem_id,
+             kondisi_kerusakan,
+             penyebab_kerusakan,
+             status_peralatan,
+             foto
+           )
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            inspectionResultRow.insertId,
+            inspectionId,
+            laboratory_id,
+            item_id,
+            subitem.category_id,
+            subitem_id,
+            damageReport.kondisi_kerusakan || null,
+            damageReport.penyebab_kerusakan || null,
+            damageReport.status_peralatan || null,
+            damagePhoto ? `/uploads/${damagePhoto.filename}` : damageReport.foto || null
+          ]
+        );
+      }
     }
 
     // Get overall status (K jika ada yang K, N/A jika semua N/A, B jika semua B)
@@ -232,6 +340,10 @@ const createInspectionWithChecklist = async (req, res, next) => {
     });
     const anyK = checklist_results.some(r => r.status?.trim()?.toUpperCase() === 'K');
     const overallStatus = allNA ? 'N/A' : anyK ? 'K' : 'B';
+
+    await connection.commit();
+    connection.release();
+    connection = null;
 
     res.status(201).json({
       success: true,
@@ -249,11 +361,16 @@ const createInspectionWithChecklist = async (req, res, next) => {
       }
     });
   } catch (err) {
-    if (req.file) {
-      fs.unlink(req.file.path, (unlinkErr) => {
-        if (unlinkErr) console.error('Error deleting file:', unlinkErr);
-      });
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackErr) {
+        console.error('Error rolling back inspection transaction:', rollbackErr);
+      } finally {
+        connection.release();
+      }
     }
+    deleteUploadedFiles(req);
     next(err);
   }
 };
@@ -505,11 +622,42 @@ const updateInspectionResult = async (req, res, next) => {
 
 // Update all inspection results at once (bulk)
 const updateInspectionResults = async (req, res, next) => {
+  let connection;
   try {
     const { id } = req.params;
-    const { bulan_ke, results } = req.body;
+    let { bulan_ke, results, damageReports } = req.body;
 
-    if (!bulan_ke || bulan_ke < 1 || bulan_ke > 6) {
+    if (typeof results === 'string') {
+      try {
+        results = JSON.parse(results);
+      } catch (e) {
+        deleteUploadedFiles(req);
+        return res.status(400).json({
+          success: false,
+          message: 'Format results JSON tidak valid'
+        });
+      }
+    }
+
+    if (typeof damageReports === 'string') {
+      try {
+        damageReports = JSON.parse(damageReports);
+      } catch (e) {
+        deleteUploadedFiles(req);
+        return res.status(400).json({
+          success: false,
+          message: 'Format damageReports JSON tidak valid'
+        });
+      }
+    }
+    if (!damageReports || typeof damageReports !== 'object' || Array.isArray(damageReports)) {
+      damageReports = {};
+    }
+
+    const month = Number(bulan_ke);
+
+    if (!month || month < 1 || month > 6) {
+      deleteUploadedFiles(req);
       return res.status(400).json({
         success: false,
         message: 'Field bulan_ke (1-6) harus diisi'
@@ -517,6 +665,7 @@ const updateInspectionResults = async (req, res, next) => {
     }
 
     if (!results || !Array.isArray(results) || results.length === 0) {
+      deleteUploadedFiles(req);
       return res.status(400).json({
         success: false,
         message: 'Daftar hasil inspeksi harus diisi'
@@ -524,11 +673,12 @@ const updateInspectionResults = async (req, res, next) => {
     }
 
     const [inspections] = await pool.query(
-      'SELECT id FROM inspections WHERE id = ?',
+      'SELECT id, laboratory_id, item_id FROM inspections WHERE id = ?',
       [id]
     );
 
     if (inspections.length === 0) {
+      deleteUploadedFiles(req);
       return res.status(404).json({
         success: false,
         message: 'Inspeksi tidak ditemukan'
@@ -538,31 +688,36 @@ const updateInspectionResults = async (req, res, next) => {
     // Check if month is already approved
     const [existingReview] = await pool.query(
       'SELECT review_status FROM inspection_monthly_reviews WHERE inspection_id = ? AND bulan_ke = ?',
-      [id, bulan_ke]
+      [id, month]
     );
 
     if (existingReview.length > 0 && existingReview[0].review_status === 'APPROVED') {
+      deleteUploadedFiles(req);
       return res.status(400).json({
         success: false,
-        message: `Hasil inspeksi bulan ke-${bulan_ke} sudah disetujui. Tidak dapat mengubah hasil yang sudah disetujui.`
+        message: `Hasil inspeksi bulan ke-${month} sudah disetujui. Tidak dapat mengubah hasil yang sudah disetujui.`
       });
     }
 
     // Check if previous month has been approved
-    if (bulan_ke > 1) {
+    if (month > 1) {
       const [prevReview] = await pool.query(
         'SELECT review_status FROM inspection_monthly_reviews WHERE inspection_id = ? AND bulan_ke = ?',
-        [id, bulan_ke - 1]
+        [id, month - 1]
       );
       if (prevReview.length === 0 || prevReview[0].review_status !== 'APPROVED') {
+        deleteUploadedFiles(req);
         return res.status(400).json({
           success: false,
-          message: `Bulan ke-${bulan_ke - 1} belum disetujui. Selesaikan dan tunggu persetujuan admin terlebih dahulu.`
+          message: `Bulan ke-${month - 1} belum disetujui. Selesaikan dan tunggu persetujuan admin terlebih dahulu.`
         });
       }
     }
 
     const allowedStatuses = ['B', 'K', 'N/A'];
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
 
     for (const r of results) {
       const status = r.status?.trim()?.toUpperCase();
@@ -572,31 +727,123 @@ const updateInspectionResults = async (req, res, next) => {
       }
 
       if (r.id) {
-        await pool.query(
+        await connection.query(
           'UPDATE inspection_results SET status = ?, keterangan = ?, approval_status = ? WHERE id = ? AND inspection_id = ? AND bulan_ke = ?',
-          [status, r.keterangan || null, 'PENDING', r.id, id, bulan_ke]
+          [status, r.keterangan || null, 'PENDING', r.id, id, month]
         );
       } else if (r.subitem_id) {
-        await pool.query(
+        await connection.query(
           `INSERT INTO inspection_results (inspection_id, subitem_id, bulan_ke, status, keterangan, approval_status)
            VALUES (?, ?, ?, ?, ?, 'PENDING')
            ON DUPLICATE KEY UPDATE status = VALUES(status), keterangan = VALUES(keterangan), approval_status = 'PENDING'`,
-          [id, r.subitem_id, bulan_ke, status, r.keterangan || null]
+          [id, r.subitem_id, month, status, r.keterangan || null]
         );
+      } else {
+        continue;
+      }
+
+      const [resultRows] = await connection.query(
+        `SELECT ir.id, ir.inspection_id, ir.subitem_id, si.category_id
+         FROM inspection_results ir
+         JOIN inspection_subitems si ON ir.subitem_id = si.id
+         WHERE ir.inspection_id = ?
+           AND ir.bulan_ke = ?
+           AND ${r.id ? 'ir.id = ?' : 'ir.subitem_id = ?'}
+         LIMIT 1`,
+        [id, month, r.id || r.subitem_id]
+      );
+
+      if (resultRows.length === 0) {
+        continue;
+      }
+
+      const inspectionResult = resultRows[0];
+      const damageReport = damageReports[inspectionResult.subitem_id] || damageReports[String(inspectionResult.subitem_id)];
+
+      if (status === 'K' && damageReport) {
+        const damagePhoto = getUploadedFile(req, `damage_report_foto_${inspectionResult.subitem_id}`);
+        const damageFoto = damagePhoto ? `/uploads/${damagePhoto.filename}` : damageReport.foto || null;
+
+        const [existingDamageReports] = await connection.query(
+          `SELECT id
+           FROM inspection_damage_reports
+           WHERE inspection_result_id = ?
+           LIMIT 1`,
+          [inspectionResult.id]
+        );
+
+        if (existingDamageReports.length > 0) {
+          await connection.query(
+            `UPDATE inspection_damage_reports
+             SET
+               inspection_id = ?,
+               laboratory_id = ?,
+               item_id = ?,
+               category_id = ?,
+               subitem_id = ?,
+               kondisi_kerusakan = ?,
+               penyebab_kerusakan = ?,
+               status_peralatan = ?,
+               foto = COALESCE(?, foto),
+               updated_at = NOW()
+             WHERE inspection_result_id = ?`,
+            [
+              id,
+              inspections[0].laboratory_id,
+              inspections[0].item_id,
+              inspectionResult.category_id,
+              inspectionResult.subitem_id,
+              damageReport.kondisi_kerusakan || null,
+              damageReport.penyebab_kerusakan || null,
+              damageReport.status_peralatan || null,
+              damageFoto,
+              inspectionResult.id
+            ]
+          );
+        } else {
+          await connection.query(
+            `INSERT INTO inspection_damage_reports
+             (
+               inspection_result_id,
+               inspection_id,
+               laboratory_id,
+               item_id,
+               category_id,
+               subitem_id,
+               kondisi_kerusakan,
+               penyebab_kerusakan,
+               status_peralatan,
+               foto
+             )
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              inspectionResult.id,
+              id,
+              inspections[0].laboratory_id,
+              inspections[0].item_id,
+              inspectionResult.category_id,
+              inspectionResult.subitem_id,
+              damageReport.kondisi_kerusakan || null,
+              damageReport.penyebab_kerusakan || null,
+              damageReport.status_peralatan || null,
+              damageFoto
+            ]
+          );
+        }
       }
     }
 
     // Upsert review record: all months need admin approval
-    await pool.query(
+    await connection.query(
       `INSERT INTO inspection_monthly_reviews (inspection_id, bulan_ke, review_status, reviewed_by, reviewed_at)
        VALUES (?, ?, 'PENDING', NULL, NULL)
        ON DUPLICATE KEY UPDATE review_status = 'PENDING', reviewed_by = NULL, reviewed_at = NULL, alasan_penolakan = NULL`,
-      [id, bulan_ke]
+      [id, month]
     );
 
-    const [updatedResults] = await pool.query(
+    const [updatedResults] = await connection.query(
       'SELECT status FROM inspection_results WHERE inspection_id = ? AND bulan_ke = ?',
-      [id, bulan_ke]
+      [id, month]
     );
 
     const total = updatedResults.length;
@@ -604,17 +851,31 @@ const updateInspectionResults = async (req, res, next) => {
     const allNA = total > 0 && updatedResults.every(r => r.status === 'N/A');
     const overallStatus = allNA ? 'N/A' : anyK ? 'K' : 'B';
 
+    await connection.commit();
+    connection.release();
+    connection = null;
+
     res.status(200).json({
       success: true,
-      message: `Hasil inspeksi bulan ke-${bulan_ke} berhasil diperbarui dan menunggu review admin`,
+      message: `Hasil inspeksi bulan ke-${month} berhasil diperbarui dan menunggu review admin`,
       data: {
-        bulan_ke,
+        bulan_ke: month,
         total_updated: results.length,
         overall_status: overallStatus,
         review_status: 'PENDING'
       }
     });
   } catch (err) {
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackErr) {
+        console.error('Error rolling back inspection results transaction:', rollbackErr);
+      } finally {
+        connection.release();
+      }
+    }
+    deleteUploadedFiles(req);
     next(err);
   }
 };

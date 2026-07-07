@@ -22,11 +22,13 @@ app.use("/api/upload", require("./src/routes/uploadRoutes"));
 // =====================
 // ROUTES
 // =====================
+app.use("/api/damage-reports", require("./src/routes/damageReportRoutes"));
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/users', require('./src/routes/userRoutes'));  
 app.use('/api/labs', require('./src/routes/laboratoryRoutes'));
 app.use('/api/items', require('./src/routes/itemRoutes'));
 app.use('/api/inspections', require('./src/routes/inspectionDetailRoutes'));
+app.use('/api/export', require('./src/routes/exportRoutes'));
 app.use('/api/criteria', require('./src/routes/inspectionCriteriaRoutes'));
 app.use('/api/schedules', require('./src/routes/scheduleRoutes'));
 

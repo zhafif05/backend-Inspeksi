@@ -11,7 +11,7 @@ router.post(
   '/create',
   verifyToken,
   authorizeRole('admin', 'kalab', 'teknisi', 'plp'),
-  multerUpload.single('foto'),
+  multerUpload.any(),
   inspectionDetailController.createInspectionWithChecklist
 );
 
@@ -26,6 +26,7 @@ router.put(
   '/:id/results',
   verifyToken,
   authorizeRole('admin', 'kalab', 'teknisi', 'plp' ),
+  multerUpload.any(),
   inspectionDetailController.updateInspectionResults
 );
 
