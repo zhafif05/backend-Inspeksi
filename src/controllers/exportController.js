@@ -161,13 +161,17 @@ function ensureDocumentNamespaces(documentXml) {
 }
 
 function imageParagraph(relId, docPrId, widthEMU, heightEMU) {
+
+  const scaledWidth = Math.round(widthEMU * 0.3);
+  const scaledHeight = Math.round(heightEMU * 0.3);
+
   return `
       <w:p>
         <w:pPr><w:jc w:val="center"/></w:pPr>
         <w:r>
           <w:drawing>
             <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0">
-              <wp:extent cx="${widthEMU}" cy="${heightEMU}"/>
+              <wp:extent cx="${scaledWidth}" cy="${scaledHeight}"/>
               <wp:effectExtent l="0" t="0" r="0" b="0"/>
               <wp:docPr id="${docPrId}" name="Foto Kerusakan ${docPrId}"/>
               <wp:cNvGraphicFramePr>
@@ -187,7 +191,7 @@ function imageParagraph(relId, docPrId, widthEMU, heightEMU) {
                     <pic:spPr>
                       <a:xfrm>
                         <a:off x="0" y="0"/>
-                        <a:ext cx="914400" cy="685800"/>
+                        <a:ext cx="${scaledWidth}" cy="${scaledHeight}"/>
                       </a:xfrm>
                       <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
                     </pic:spPr>
@@ -1935,7 +1939,29 @@ async function buildRepairLabsData(tahun, semester) {
       continue;
     }
 
-    const repairItems = await getRepairEquipmentData(inspections);
+    // 🔥 UBAH: Gunakan statsMap seperti di buildDamagedLabsData
+    const statsMap = await getDamagedInspectionStats(inspections.map(inspection => inspection.id));
+    const repairItems = [];
+
+    for (const inspection of inspections) {
+      const stats = statsMap.get(Number(inspection.id));
+      
+      // 🔥 UBAH: Filter damage >= 50% seperti di alat rusak
+      if (!stats || !isDamagedByHalfOrMore(stats.total_results, stats.damaged_results)) {
+        continue;
+      }
+
+      // 🔥 UBAH: Gunakan getDamageReportForInspection seperti di alat rusak
+      const damageReport = await getDamageReportForInspection(inspection.id);
+      if (damageReport) {
+        repairItems.push({
+          inspection,
+          stats,
+          damageReport
+        });
+      }
+    }
+
     if (repairItems.length > 0) {
       exportLabs.push({ lab, repairItems });
     }
@@ -2120,29 +2146,19 @@ function buildRepairTableRows(tableXml, repairItems) {
   const subHeaderRow = rowMatches[1];
   const dataTemplateRow = rowMatches[2];
 
-  const uniqueItems = [];
-  const seen = new Set();
-  for (const item of repairItems) {
-    const key = `${item.item_id}_${item.inspection_id}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      uniqueItems.push(item);
-    }
-  }
-
-  const dataRows = uniqueItems.map((item, itemIndex) => {
-    let statusSudah = '';
-    let statusBelum = '';
-    let statusAjukan = '';
-
+  // 🔥 PERBAIKI: Gunakan format data baru dari buildRepairLabsData
+  const dataRows = repairItems.map((item, itemIndex) => {
+    const damageReport = item.damageReport || {};
+    const stats = item.stats || {};
+    
     let rowXml = dataTemplateRow;
     rowXml = replaceRowCellAt(rowXml, 0, String(itemIndex + 1));
-    rowXml = replaceRowCellAt(rowXml, 1, item.nama_barang || '-');
-    rowXml = replaceRowCellAt(rowXml, 2, item.kode_barang || '-');
-    rowXml = replaceRowCellAt(rowXml, 3, statusSudah);
-    rowXml = replaceRowCellAt(rowXml, 4, statusBelum);
-    rowXml = replaceRowCellAt(rowXml, 5, statusAjukan);
-    rowXml = replaceRowCellAt(rowXml, 6, '-'); // foto dihapus, selalu '-'
+    rowXml = replaceRowCellAt(rowXml, 1, item.inspection.nama_barang || '-');
+    rowXml = replaceRowCellAt(rowXml, 2, item.inspection.kode_barang || '-');
+    rowXml = replaceRowCellAt(rowXml, 3, damageReport.kondisi_kerusakan || '-');
+    rowXml = replaceRowCellAt(rowXml, 4, damageReport.penyebab_kerusakan || '-');
+    rowXml = replaceRowCellAt(rowXml, 5, damageReport.status_peralatan || '-');
+    rowXml = replaceRowCellAt(rowXml, 6, '-');
     rowXml = replaceRowCellAt(rowXml, 7, '-');
     return rowXml;
   }).join('');
@@ -2464,11 +2480,6 @@ async function cloneTemplateWithDamagedEquipmentPages(labsData, tahun, semester)
     ? bodyContent.slice(0, lastSectPrMatch.index) +
     bodyContent.slice(lastSectPrMatch.index + lastSectPrMatch[0].length)
     : bodyContent;
-
-  // =============================================
-  // PISAHKAN HEADER (Logo + Nama Lab + dll)
-  // =============================================
-
   // Cari marker "LAPORAN PER SEMESTER" untuk memisahkan header
   const marker = '<w:t>LAPORAN PER SEMESTER P</w:t>';
   const markerIndex = bodyTemplate.indexOf(marker);
@@ -2494,11 +2505,6 @@ async function cloneTemplateWithDamagedEquipmentPages(labsData, tahun, semester)
     }
   }
 
-  // =============================================
-  // HAPUS LOGO DARI bodyWithoutHeader
-  // =============================================
-  // Cari dan hapus gambar (logo) dari bodyWithoutHeader
-  // Pola: <w:p> yang mengandung <w:drawing> dengan gambar
   const logoRegex = /<w:p[\s\S]*?<w:drawing[\s\S]*?<wp:inline[\s\S]*?<a:blip[\s\S]*?r:embed="[^"]*"[\s\S]*?<\/a:blip>[\s\S]*?<\/wp:inline>[\s\S]*?<\/w:drawing>[\s\S]*?<\/w:p>/g;
 
   // Hapus semua gambar/logo dari bodyWithoutHeader
@@ -2506,10 +2512,6 @@ async function cloneTemplateWithDamagedEquipmentPages(labsData, tahun, semester)
 
   // Juga hapus paragraf kosong yang mungkin tersisa
   bodyWithoutHeader = bodyWithoutHeader.replace(/<w:p>\s*<\/w:p>/g, '');
-
-  // =============================================
-  // BUILD PAGES
-  // =============================================
   const pages = labsData.map((entry, labIndex) => {
     let pageContent;
 
